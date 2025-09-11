@@ -9,6 +9,10 @@ Sistem ini terdiri dari beberapa service yang saling terhubung melalui **Eureka 
 - **order_service** → Mengelola data pemesanan.  
 - **produk_service** → Mengelola data produk.  
 - **pelanggan_service** → Mengelola data pelanggan.  
+- **anggota_service** → Mengelola data anggota.  
+- **buku_service** → Mengelola data buku.  
+- **peminjaman_service** → Mengelola data peminjaman.  
+- **pengembalian_service** → Mengelola data pengembalian.  
 
 ---
 
@@ -26,7 +30,7 @@ Sistem ini terdiri dari beberapa service yang saling terhubung melalui **Eureka 
    ./mvnw spring-boot:run
    ```
 
-3. Jalankan service lainnya satu per satu:
+3. Jalankan service yang diperlukan:
 
    Jalankan **Order Service**:
    ```bash
@@ -43,6 +47,24 @@ Sistem ini terdiri dari beberapa service yang saling terhubung melalui **Eureka 
    Jalankan **Pelanggan Service**:
    ```bash
    cd pelanggan_service
+   ./mvnw spring-boot:run
+   ```
+
+   Jalankan **Anggota Service**:
+   ```bash
+   cd anggota_service
+   ./mvnw spring-boot:run
+   ```
+
+   Jalankan **Peminjaman Service**:
+   ```bash
+   cd peminjaman_service
+   ./mvnw spring-boot:run
+   ```
+
+   Jalankan **Pengembalian Service**:
+   ```bash
+   cd pengembalian_service
    ./mvnw spring-boot:run
    ```
 
@@ -117,6 +139,109 @@ Base URL: `http://localhost:8082/`
   "kode": String,
   "nama": String,
   "alamat": String
+}
+```
+
+---
+
+### 4. Anggota Service
+Base URL: `http://localhost:8084/`
+
+| Method | Endpoint               | Deskripsi                            |
+|--------|------------------------|--------------------------------------|
+| POST   | `/api/anggota`       | Menambahkan anggota baru           |
+| GET    | `/api/anggota`       | Mendapatkan semua anggota          |
+| GET    | `/api/anggota/{id}`  | Mendapatkan anggota berdasarkan ID |
+| DELETE | `/api/anggota/{id}`  | Menghapus anggota berdasarkan ID   |
+
+**Contoh Body POST**
+```json
+{
+  "nim": String,
+  "nama": String,
+  "alamat": String,
+  "jenisKelamin":String
+}
+```
+
+---
+
+### 5. Buku Service
+Base URL: `http://localhost:8085/`
+
+| Method | Endpoint               | Deskripsi                            |
+|--------|------------------------|--------------------------------------|
+| POST   | `/api/buku`       | Menambahkan buku baru           |
+| GET    | `/api/buku`       | Mendapatkan semua buku          |
+| GET    | `/api/buku/{id}`  | Mendapatkan buku berdasarkan ID |
+| DELETE | `/api/buku/{id}`  | Menghapus buku berdasarkan ID   |
+
+**Contoh Body POST**
+```json
+{
+  "judul": String,
+  "pengarang": String,
+  "penerbit": String,
+  "tahunTerbit":String
+}
+```
+
+---
+
+### 6 Peminjaman Service
+Base URL: `http://localhost:8086/`
+
+Format tanggal pinjam dan tanggal kembali dd-MM-yyyy.
+```json
+{
+  "tanggalPinjam": "12-08-2025",
+  "tanggalKembali": "15-08-2025",
+}
+```
+
+| Method | Endpoint               | Deskripsi                            |
+|--------|------------------------|--------------------------------------|
+| POST   | `/api/peminjaman`       | Menambahkan peminjaman baru           |
+| GET    | `/api/peminjaman`       | Mendapatkan semua peminjaman          |
+| GET    | `/api/peminjaman/{id}`  | Mendapatkan peminjaman berdasarkan ID |
+| GET    | `/api/peminjaman/{id}/detail`  | Mendapatkan peminjaman berdasarkan ID beserta detailnya |
+| DELETE | `/api/peminjaman/{id}`  | Menghapus peminjaman berdasarkan ID   |
+
+**Contoh Body POST**
+```json
+{
+  "tanggalPinjam": String,
+  "tanggalKembali": String,
+  "anggotaId": Long,
+  "bukuId": Long
+}
+```
+
+---
+
+### 7 Pengembalian Service
+Base URL: `http://localhost:8087/`
+
+Format tanggal dikembalikan dd-MM-yyyy.
+```json
+{
+  "tanggalDikembalikan": "12-08-2025",
+}
+```
+
+| Method | Endpoint               | Deskripsi                            |
+|--------|------------------------|--------------------------------------|
+| POST   | `/api/pengembalian`       | Menambahkan pengembalian baru           |
+| GET    | `/api/pengembalian`       | Mendapatkan semua pengembalian          |
+| GET    | `/api/pengembalian/{id}`  | Mendapatkan pengembalian berdasarkan ID |
+| GET    | `/api/pengembalian/{id}/detail`  | Mendapatkan pengembalian berdasarkan ID beserta detailnya |
+| DELETE | `/api/pengembalian/{id}`  | Menghapus pengembalian berdasarkan ID   |
+
+**Contoh Body POST**
+```json
+{
+  "peminjamanId": Long,
+  "tanggalDikembalikan": String
 }
 ```
 
