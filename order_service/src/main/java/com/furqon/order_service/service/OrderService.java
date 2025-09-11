@@ -17,52 +17,51 @@ import com.furqon.order_service.vo.ResponseTemplate;
 
 @Service
 public class OrderService {
-    private final DiscoveryClient discoveryClient;
-
-	public OrderService(DiscoveryClient discoveryClient) {
-		this.discoveryClient = discoveryClient;
-    }
-
     @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
     private RestTemplate restTemplate;
+    
+    @Autowired
+    private DiscoveryClient discoveryClient;
 
-    public List<Order> getAllOrders(){
+    public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    public Order getOrderById(Long id){
+    public Order getOrderById(Long id) {
         return orderRepository.findById(id).orElse(null);
     }
 
-    public Order createOrder(Order order){
+    public Order createOrder(Order order) {
         return orderRepository.save(order);
     }
 
-    public void deleteOrder(Long id){
+    public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
     }
 
-    public List<ResponseTemplate> getOrderWithProductById(Long id){
+    public List<ResponseTemplate> getOrderWithProductById(Long id) {
         List<ResponseTemplate> responseList = new ArrayList<>();
         Order order = getOrderById(id);
-        if(order == null){
+        if (order == null) {
             return null;
         }
 
         ServiceInstance serviceInstanceProduct = discoveryClient.getInstances("PRODUK_SERVICE").get(0);
         ServiceInstance serviceInstancePelanggan = discoveryClient.getInstances("PELANGGAN_SERVICE").get(0);
-        Product product = restTemplate.getForObject(serviceInstanceProduct.getUri() + "/api/product/" + order.getProductId(), Product.class);
-        Pelanggan pelanggan = restTemplate.getForObject(serviceInstancePelanggan.getUri()+ "/api/pelanggan/" + order.getPelangganId(), Pelanggan.class);
-        
+        Product product = restTemplate
+                .getForObject(serviceInstanceProduct.getUri() + "/api/product/" + order.getProductId(), Product.class);
+        Pelanggan pelanggan = restTemplate.getForObject(
+                serviceInstancePelanggan.getUri() + "/api/pelanggan/" + order.getPelangganId(), Pelanggan.class);
+
         ResponseTemplate vo = new ResponseTemplate();
         vo.setOrder(order);
         vo.setProduct(product);
         vo.setPelanggan(pelanggan);
         responseList.add(vo);
-       
+
         return responseList;
     }
 }
