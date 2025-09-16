@@ -49,12 +49,11 @@ public class OrderService {
             return null;
         }
 
-        ServiceInstance serviceInstanceProduct = discoveryClient.getInstances("PRODUK-SERVICE").get(0);
-        ServiceInstance serviceInstancePelanggan = discoveryClient.getInstances("PELANGGAN-SERVICE").get(0);
+        ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY").get(0);
         Product product = restTemplate
-                .getForObject(serviceInstanceProduct.getUri() + "/api/product/" + order.getProductId(), Product.class);
+                .getForObject(serviceInstance.getUri() + "/api/product/" + order.getProductId(), Product.class);
         Pelanggan pelanggan = restTemplate.getForObject(
-                serviceInstancePelanggan.getUri() + "/api/pelanggan/" + order.getPelangganId(), Pelanggan.class);
+                serviceInstance.getUri() + "/api/pelanggan/" + order.getPelangganId(), Pelanggan.class);
 
         ResponseTemplate vo = new ResponseTemplate();
         vo.setOrder(order);
