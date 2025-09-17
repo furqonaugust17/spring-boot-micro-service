@@ -15,6 +15,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.furqon.pengembalian_service.model.Pengembalian;
 import com.furqon.pengembalian_service.repository.PengembalianRepository;
+import com.furqon.pengembalian_service.vo.Anggota;
+import com.furqon.pengembalian_service.vo.Buku;
 import com.furqon.pengembalian_service.vo.Peminjaman;
 import com.furqon.pengembalian_service.vo.ResponseTemplate;
 
@@ -70,10 +72,14 @@ public class PengembalianService {
         ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
 
         Peminjaman peminjaman = restTemplate.getForObject(serviceInstance.getUri() + "/api/peminjaman/" + pengembalian.getPeminjamanId(), Peminjaman.class);
+        Anggota anggota = restTemplate.getForObject(serviceInstance.getUri() + "/api/anggota/" + peminjaman.getAnggotaId(), Anggota.class);
+        Buku buku = restTemplate.getForObject(serviceInstance.getUri() + "/api/buku/" + peminjaman.getBukuId(), Buku.class);
 
         ResponseTemplate vo = new ResponseTemplate();
         vo.setPengembalian(pengembalian);
         vo.setPeminjaman(peminjaman);
+        vo.setBuku(buku);
+        vo.setAnggota(anggota);
 
         responseTemplates.add(vo);
 
