@@ -50,11 +50,10 @@ public class PeminjamanService {
             return null;
         }
 
-        ServiceInstance serviceInstanceAnggota = discoveryClient.getInstances("ANGGOTA_SERVICE").get(0);
-        ServiceInstance serviceInstanceBuku = discoveryClient.getInstances("BUKU_SERVICE").get(0);
+        ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
 
-        Anggota anggota = restTemplate.getForObject(serviceInstanceAnggota.getUri() + "/api/anggota/" + peminjaman.getAnggotaId(), Anggota.class);
-        Buku buku = restTemplate.getForObject(serviceInstanceBuku.getUri() + "/api/buku/" + peminjaman.getBukuId(), Buku.class);
+        Anggota anggota = restTemplate.getForObject(serviceInstance.getUri() + "/api/anggota/" + peminjaman.getAnggotaId(), Anggota.class);
+        Buku buku = restTemplate.getForObject(serviceInstance.getUri() + "/api/buku/" + peminjaman.getBukuId(), Buku.class);
 
         ResponseTemplate vo = new ResponseTemplate();
         vo.setPeminjaman(peminjaman);
