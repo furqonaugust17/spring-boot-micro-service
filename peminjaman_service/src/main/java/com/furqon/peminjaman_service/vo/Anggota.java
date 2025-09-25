@@ -4,15 +4,17 @@ public class Anggota {
     private Long id;
     private String nim;
     private String nama;
+    private String email;
     private String jenisKelamin;
 
     public Anggota() {
     }
 
-    public Anggota(Long id, String nim, String nama, String jenisKelamin) {
+    public Anggota(Long id, String nim, String nama, String email,String jenisKelamin) {
         this.id = id;
         this.nim = nim;
         this.nama = nama;
+        this.email = email;
         this.jenisKelamin = jenisKelamin;
     }
 
@@ -46,5 +48,13 @@ public class Anggota {
 
     public void setJenisKelamin(String jenisKelamin) {
         this.jenisKelamin = jenisKelamin;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
