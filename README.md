@@ -1,255 +1,160 @@
 # Spring Boot Microservices Project
 
 ## 📌 Deskripsi
-Project ini merupakan implementasi arsitektur **microservices** menggunakan **Spring Boot** sebagai bagian dari tugas kuliah.  
-Sistem ini terdiri dari beberapa service yang saling terhubung melalui **Eureka Server** sebagai service registry.  
+Project ini merupakan implementasi arsitektur **microservices** menggunakan **Spring Boot** sebagai bagian dari tugas kuliah. Sistem ini mengadopsi pola API Gateway sebagai titik masuk tunggal untuk mengakses grup service yang relevan.
 
-### Struktur Service
-- **eureka_server** → Service registry sebagai penghubung antar service.  
-- **order_service** → Mengelola data pemesanan.  
-- **produk_service** → Mengelola data produk.  
-- **pelanggan_service** → Mengelola data pelanggan.  
-- **anggota_service** → Mengelola data anggota.  
-- **buku_service** → Mengelola data buku.  
-- **peminjaman_service** → Mengelola data peminjaman.  
-- **pengembalian_service** → Mengelola data pengembalian.  
+Komunikasi dan penemuan service diatur oleh **Eureka Server**, sementara komunikasi asinkron pada layanan perpustakaan ditangani oleh **RabbitMQ**.
+
+## 🏛️ Arsitektur Sistem
+Sistem ini terbagi menjadi dua domain utama, masing-masing diakses melalui API Gateway-nya sendiri.
+
+1.  **Domain Toko (Port `9000`)**
+    * `api_gateway_toko`
+        * `produk_service`
+        * `pelanggan_service`
+        * `order_service`
+
+2.  **Domain Pustaka (Port `9002`)**
+    * `api_gateway_pustaka`
+        * `buku_service`
+        * `anggota_service`
+        * `peminjaman_service`
+        * `pengembalian_service`
+    * `rabbitmq-pustaka` (Service untuk notifikasi/messaging)
+
+## 🏗️ Struktur Service
+- **eureka_server** → Service registry sebagai penghubung antar service.
+- **api-gateway** → Gateway untuk service terkait Toko (produk, pelanggan, order).
+- **api-gateway-pustaka** → Gateway untuk service terkait Pustaka (buku, anggota, peminjaman).
+- **produk_service** → Mengelola data produk.
+- **pelanggan_service** → Mengelola data pelanggan.
+- **order_service** → Mengelola data pemesanan.
+- **buku_service** → Mengelola data buku.
+- **anggota_service** → Mengelola data anggota.
+- **peminjaman_service** → Mengelola data peminjaman.
+- **pengembalian_service** → Mengelola data pengembalian.
+- **rabbitmq-service** → Implementasi rabbitmq pada service order.
+- **rabbitmq-pustaka** → Service untuk menangani message-broker dengan RabbitMQ untuk domain Pustaka.
 
 ---
 
 ## 🚀 Tahapan Menjalankan Project
 
-1. Clone repository:
-   ```bash
-   git clone https://github.com/furqonaugust17/spring-boot-micro-service.git
-   cd spring-boot-micro-service
-   ```
+1.  **Clone Repository:**
+    ```bash
+    git clone https://github.com/furqonaugust17/spring-boot-micro-service.git
+    cd spring-boot-micro-service
+    ```
 
-2. Jalankan **Eureka Server** terlebih dahulu:
-   ```bash
-   cd eureka_server
-   ./mvnw spring-boot:run
-   ```
+2.  **Jalankan Eureka Server (Wajib Pertama):**
+    ```bash
+    cd eureka_server
+    ./mvnw spring-boot:run
+    ```
+    Akses dashboard di `http://localhost:8761`. Pastikan Eureka berjalan sebelum melanjutkan.
 
-3. Jalankan service yang diperlukan:
+3.  **Jalankan Semua Service Inti:**
+    Buka terminal baru untuk setiap service dan jalankan perintah berikut di dalam direktori masing-masing (`produk_service`, `pelanggan_service`, `order_service`, `buku_service`, `anggota_service`, `peminjaman_service`, `pengembalian_service`, `rabbitmq-pustaka`).
+    ```bash
+    # Contoh untuk produk_service
+    cd produk_service
+    ./mvnw spring-boot:run
+    ```
+    Pastikan semua service telah terdaftar di dashboard Eureka.
 
-   Jalankan **Order Service**:
-   ```bash
-   cd order_service
-   ./mvnw spring-boot:run
-   ```
+4.  **Jalankan API Gateway:**
+    Setelah semua service inti berjalan, jalankan kedua gateway di terminal terpisah.
 
-   Jalankan **Produk Service**:
-   ```bash
-   cd produk_service
-   ./mvnw spring-boot:run
-   ```
+    **Jalankan API Gateway Toko:**
+    ```bash
+    cd api_gateway
+    ./mvnw spring-boot:run
+    ```
 
-   Jalankan **Pelanggan Service**:
-   ```bash
-   cd pelanggan_service
-   ./mvnw spring-boot:run
-   ```
-
-   Jalankan **Anggota Service**:
-   ```bash
-   cd anggota_service
-   ./mvnw spring-boot:run
-   ```
-
-   Jalankan **Peminjaman Service**:
-   ```bash
-   cd peminjaman_service
-   ./mvnw spring-boot:run
-   ```
-
-   Jalankan **Pengembalian Service**:
-   ```bash
-   cd pengembalian_service
-   ./mvnw spring-boot:run
-   ```
-
-4. Akses **Eureka Dashboard** di browser:
-   ```
-   http://localhost:8761
-   ```
+    **Jalankan API Gateway Pustaka:**
+    ```bash
+    cd api-gateway-pustaka
+    ./mvnw spring-boot:run
+    ```
 
 ---
 
 ## 📡 Endpoint Service
 
-### 1. Order Service
-Base URL: `http://localhost:8083/`
+Semua request sekarang harus melalui API Gateway.
 
-| Method | Endpoint                  | Deskripsi                        |
-|--------|---------------------------|----------------------------------|
-| POST   | `/api/order`              | Membuat order baru               |
-| GET    | `/api/order`              | Mendapatkan semua order          |
-| GET    | `/api/order/{id}`         | Mendapatkan order berdasarkan ID |
-| DELETE | `/api/order/{id}`         | Menghapus order berdasarkan ID   |
+### Gateway Toko (Base URL: `http://localhost:9000`)
+
+#### 1. Produk Service
+| Method | Endpoint                    | Deskripsi                         |
+|--------|-----------------------------|-----------------------------------|
+| POST   | `/api/product`       | Menambahkan produk baru           |
+| GET    | `/api/product`       | Mendapatkan semua produk          |
+| GET    | `/api/product/{id}`  | Mendapatkan produk berdasarkan ID |
+| DELETE | `/api/product/{id}`  | Menghapus produk berdasarkan ID   |
+
+#### 2. Pelanggan Service
+| Method | Endpoint                      | Deskripsi                            |
+|--------|-------------------------------|--------------------------------------|
+| POST   | `/api/pelanggan`      | Menambahkan pelanggan baru           |
+| GET    | `/api/pelanggan`      | Mendapatkan semua pelanggan          |
+| GET    | `/api/pelanggan/{id}` | Mendapatkan pelanggan berdasarkan ID |
+| DELETE | `/api/pelanggan/{id}` | Menghapus pelanggan berdasarkan ID   |
+
+#### 3. Order Service
+| Method | Endpoint                        | Deskripsi                         |
+|--------|---------------------------------|-----------------------------------|
+| POST   | `/api/order`              | Membuat order baru                |
+| GET    | `/api/order`              | Mendapatkan semua order           |
+| GET    | `/api/order/{id}`         | Mendapatkan order berdasarkan ID  |
+| DELETE | `/api/order/{id}`         | Menghapus order berdasarkan ID    |
 | GET    | `/api/order/product/{id}` | Mendapatkan order + product by ID |
 
-**Contoh Body POST**
-```json
-{
-  "productId": Long,
-  "pelangganId": Long,
-  "jumlah": Integer,
-  "tanggal": String,
-  "status": String,
-  "total": Double
-}
-```
-
 ---
 
-### 2. Produk Service
-Base URL: `http://localhost:8081/`
+### Gateway Pustaka (Base URL: `http://localhost:9002`)
 
-| Method | Endpoint            | Deskripsi                         |
-|--------|---------------------|-----------------------------------|
-| POST   | `/api/product`      | Menambahkan produk baru           |
-| GET    | `/api/product`      | Mendapatkan semua produk          |
-| GET    | `/api/product/{id}` | Mendapatkan produk berdasarkan ID |
-| DELETE | `/api/product/{id}` | Menghapus produk berdasarkan ID   |
+#### 4. Anggota Service
+| Method | Endpoint                    | Deskripsi                            |
+|--------|-----------------------------|--------------------------------------|
+| POST   | `/api/anggota`      | Menambahkan anggota baru           |
+| GET    | `/api/anggota`      | Mendapatkan semua anggota          |
+| GET    | `/api/anggota/{id}` | Mendapatkan anggota berdasarkan ID |
+| DELETE | `/api/anggota/{id}` | Menghapus anggota berdasarkan ID   |
 
-**Contoh Body POST**
-```json
-{
-  "nama": String,
-  "satuan": String,
-  "harga": Double
-}
-```
+#### 5. Buku Service
+| Method | Endpoint                | Deskripsi                         |
+|--------|-------------------------|-----------------------------------|
+| POST   | `/api/buku`        | Menambahkan buku baru           |
+| GET    | `/api/buku`        | Mendapatkan semua buku          |
+| GET    | `/api/buku/{id}`   | Mendapatkan buku berdasarkan ID |
+| DELETE | `/api/buku/{id}`   | Menghapus buku berdasarkan ID   |
 
----
+#### 6. Peminjaman Service
+| Method | Endpoint                              | Deskripsi                                                 |
+|--------|---------------------------------------|-----------------------------------------------------------|
+| POST   | `/api/peminjaman`          | Menambahkan peminjaman baru                             |
+| GET    | `/api/peminjaman`          | Mendapatkan semua peminjaman                            |
+| GET    | `/api/peminjaman/{id}`     | Mendapatkan peminjaman berdasarkan ID                   |
+| GET    | `/api/peminjaman/{id}/detail`| Mendapatkan peminjaman berdasarkan ID beserta detailnya |
+| DELETE | `/api/peminjaman/{id}`     | Menghapus peminjaman berdasarkan ID                     |
 
-### 3. Pelanggan Service
-Base URL: `http://localhost:8082/`
-
-| Method | Endpoint               | Deskripsi                            |
-|--------|------------------------|--------------------------------------|
-| POST   | `/api/pelanggan`       | Menambahkan pelanggan baru           |
-| GET    | `/api/pelanggan`       | Mendapatkan semua pelanggan          |
-| GET    | `/api/pelanggan/{id}`  | Mendapatkan pelanggan berdasarkan ID |
-| DELETE | `/api/pelanggan/{id}`  | Menghapus pelanggan berdasarkan ID   |
-
-**Contoh Body POST**
-```json
-{
-  "kode": String,
-  "nama": String,
-  "alamat": String
-}
-```
-
----
-
-### 4. Anggota Service
-Base URL: `http://localhost:8084/`
-
-| Method | Endpoint               | Deskripsi                            |
-|--------|------------------------|--------------------------------------|
-| POST   | `/api/anggota`       | Menambahkan anggota baru           |
-| GET    | `/api/anggota`       | Mendapatkan semua anggota          |
-| GET    | `/api/anggota/{id}`  | Mendapatkan anggota berdasarkan ID |
-| DELETE | `/api/anggota/{id}`  | Menghapus anggota berdasarkan ID   |
-
-**Contoh Body POST**
-```json
-{
-  "nim": String,
-  "nama": String,
-  "alamat": String,
-  "jenisKelamin":String
-}
-```
-
----
-
-### 5. Buku Service
-Base URL: `http://localhost:8085/`
-
-| Method | Endpoint               | Deskripsi                            |
-|--------|------------------------|--------------------------------------|
-| POST   | `/api/buku`       | Menambahkan buku baru           |
-| GET    | `/api/buku`       | Mendapatkan semua buku          |
-| GET    | `/api/buku/{id}`  | Mendapatkan buku berdasarkan ID |
-| DELETE | `/api/buku/{id}`  | Menghapus buku berdasarkan ID   |
-
-**Contoh Body POST**
-```json
-{
-  "judul": String,
-  "pengarang": String,
-  "penerbit": String,
-  "tahunTerbit":String
-}
-```
-
----
-
-### 6 Peminjaman Service
-Base URL: `http://localhost:8086/`
-
-Format tanggal pinjam dan tanggal kembali dd-MM-yyyy.
-```json
-{
-  "tanggalPinjam": "12-08-2025",
-  "tanggalKembali": "15-08-2025",
-}
-```
-
-| Method | Endpoint               | Deskripsi                            |
-|--------|------------------------|--------------------------------------|
-| POST   | `/api/peminjaman`       | Menambahkan peminjaman baru           |
-| GET    | `/api/peminjaman`       | Mendapatkan semua peminjaman          |
-| GET    | `/api/peminjaman/{id}`  | Mendapatkan peminjaman berdasarkan ID |
-| GET    | `/api/peminjaman/{id}/detail`  | Mendapatkan peminjaman berdasarkan ID beserta detailnya |
-| DELETE | `/api/peminjaman/{id}`  | Menghapus peminjaman berdasarkan ID   |
-
-**Contoh Body POST**
-```json
-{
-  "tanggalPinjam": String,
-  "tanggalKembali": String,
-  "anggotaId": Long,
-  "bukuId": Long
-}
-```
-
----
-
-### 7 Pengembalian Service
-Base URL: `http://localhost:8087/`
-
-Format tanggal dikembalikan dd-MM-yyyy.
-```json
-{
-  "tanggalDikembalikan": "12-08-2025",
-}
-```
-
-| Method | Endpoint               | Deskripsi                            |
-|--------|------------------------|--------------------------------------|
-| POST   | `/api/pengembalian`       | Menambahkan pengembalian baru           |
-| GET    | `/api/pengembalian`       | Mendapatkan semua pengembalian          |
-| GET    | `/api/pengembalian/{id}`  | Mendapatkan pengembalian berdasarkan ID |
-| GET    | `/api/pengembalian/{id}/detail`  | Mendapatkan pengembalian berdasarkan ID beserta detailnya |
-| DELETE | `/api/pengembalian/{id}`  | Menghapus pengembalian berdasarkan ID   |
-
-**Contoh Body POST**
-```json
-{
-  "peminjamanId": Long,
-  "tanggalDikembalikan": String
-}
-```
+#### 7. Pengembalian Service
+| Method | Endpoint                                    | Deskripsi                                                     |
+|--------|---------------------------------------------|---------------------------------------------------------------|
+| POST   | `/api/pengembalian`            | Menambahkan pengembalian baru                               |
+| GET    | `/api/pengembalian`            | Mendapatkan semua pengembalian                              |
+| GET    | `/api/pengembalian/{id}`       | Mendapatkan pengembalian berdasarkan ID                     |
+| GET    | `/api/pengembalian/{id}/detail`| Mendapatkan pengembalian berdasarkan ID beserta detailnya |
+| DELETE | `/api/pengembalian/{id}`       | Menghapus pengembalian berdasarkan ID                       |
 
 ---
 
 ## ⚙️ Teknologi yang Digunakan
-- Java 17+  
-- Spring Boot 3.5.5
-- Spring Cloud Netflix Eureka  
-- Maven  
-- REST API  
+- Java 17+
+- Spring Boot
+- Spring Cloud Netflix Eureka
+- **Spring Cloud Gateway**
+- **RabbitMQ**
+- Maven
+- REST API
