@@ -3,7 +3,9 @@ package com.furqon.peminjaman_service.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,15 @@ import com.furqon.peminjaman_service.vo.ResponseTemplate;
 
 @Service
 public class PeminjamanService {
+    
+    private final RabbitTemplate rabbitTemplate;
+    
+    @Value("${app.rabbitmq.exchange}")
+    private String exchange;
+    
+    @Value("${app.rabbitmq.routing-key}")
+    private String routingKey;
+
     @Autowired
     private PeminjamanRepository peminjamanRepository;
 
@@ -25,6 +36,10 @@ public class PeminjamanService {
 
     @Autowired
     private DiscoveryClient discoveryClient;
+
+    public PeminjamanService(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
+    }
 
     public List<Peminjaman> getAllPeminjaman(){
         return peminjamanRepository.findAll();
@@ -35,7 +50,10 @@ public class PeminjamanService {
     }
 
     public Peminjaman createPeminjaman(Peminjaman peminjaman) {
-        return peminjamanRepository.save(peminjaman);
+        Peminjaman savedPeminjamanan = peminjamanRepository.save(peminjaman);
+
+        rabbitTemplate.convertAndSend(exchange, routingKey, savedPeminjamanan);
+        return savedPeminjamanan;
     }
 
     public void deletePeminjaman(Long id) {
