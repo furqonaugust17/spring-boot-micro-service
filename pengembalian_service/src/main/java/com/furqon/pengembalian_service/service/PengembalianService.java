@@ -31,25 +31,18 @@ public class PengembalianService {
     @Autowired
     private DiscoveryClient discoveryClient;
 
-    public List<Pengembalian> getAllPengembalians(){
+    public List<Pengembalian> getAllPengembalians() {
         return pengembalianRepository.findAll();
     }
 
-     public Pengembalian getPengembalianById(Long id) {
+    public Pengembalian getPengembalianById(Long id) {
         return pengembalianRepository.findById(id).orElse(null);
     }
 
     public Pengembalian createPengembalian(Pengembalian pengembalian) throws ParseException {
-        Peminjaman peminjaman = this.getPeminjaman(pengembalian.getPeminjamanId());
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
-        Date tanggalKembali = sdf.parse(peminjaman.getTanggalKembali());
-        Date tanggalDikembalikan = sdf.parse(pengembalian.getTanggalDikembalikan());
-
-        long diffInMillies = tanggalDikembalikan.getTime() - tanggalKembali.getTime();
-        long jumlahHari = diffInMillies < 0 ? 0 : Math.abs(diffInMillies);
-        long terlambat = TimeUnit.DAYS.convert(jumlahHari, TimeUnit.MILLISECONDS);
-        double denda = terlambat * 2000;
+        long terlambat = this.calculateTerlambat(pengembalian);
+        double denda = terlambat * 1000;
 
         pengembalian.setTerlambat(terlambat + " Hari");
         pengembalian.setDenda(denda);
@@ -61,19 +54,22 @@ public class PengembalianService {
         pengembalianRepository.deleteById(id);
     }
 
-    public List<ResponseTemplate> getPengembalianWithPeminjamanById(Long id){
+    public List<ResponseTemplate> getPengembalianWithPeminjamanById(Long id) {
         List<ResponseTemplate> responseTemplates = new ArrayList<>();
         Pengembalian pengembalian = getPengembalianById(id);
 
-        if(pengembalian == null){
+        if (pengembalian == null) {
             return null;
         }
 
         ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
 
-        Peminjaman peminjaman = restTemplate.getForObject(serviceInstance.getUri() + "/api/peminjaman/" + pengembalian.getPeminjamanId(), Peminjaman.class);
-        Anggota anggota = restTemplate.getForObject(serviceInstance.getUri() + "/api/anggota/" + peminjaman.getAnggotaId(), Anggota.class);
-        Buku buku = restTemplate.getForObject(serviceInstance.getUri() + "/api/buku/" + peminjaman.getBukuId(), Buku.class);
+        Peminjaman peminjaman = restTemplate.getForObject(
+                serviceInstance.getUri() + "/api/peminjaman/" + pengembalian.getPeminjamanId(), Peminjaman.class);
+        Anggota anggota = restTemplate
+                .getForObject(serviceInstance.getUri() + "/api/anggota/" + peminjaman.getAnggotaId(), Anggota.class);
+        Buku buku = restTemplate.getForObject(serviceInstance.getUri() + "/api/buku/" + peminjaman.getBukuId(),
+                Buku.class);
 
         ResponseTemplate vo = new ResponseTemplate();
         vo.setPengembalian(pengembalian);
@@ -86,13 +82,27 @@ public class PengembalianService {
         return responseTemplates;
     }
 
-    public Peminjaman getPeminjaman(Long id){
+    public Peminjaman getPeminjaman(Long id) {
         try {
             ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
-            Peminjaman peminjaman = restTemplate.getForObject(serviceInstance.getUri() + "/api/peminjaman/" + id, Peminjaman.class);
+            Peminjaman peminjaman = restTemplate.getForObject(serviceInstance.getUri() + "/api/peminjaman/" + id,
+                    Peminjaman.class);
             return peminjaman;
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public long calculateTerlambat(Pengembalian pengembalian) throws ParseException {
+        Peminjaman peminjaman = this.getPeminjaman(pengembalian.getPeminjamanId());
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+
+        Date tanggalKembali = sdf.parse(peminjaman.getTanggalKembali());
+        Date tanggalDikembalikan = sdf.parse(pengembalian.getTanggalDikembalikan());
+
+        long diffInMillies = tanggalDikembalikan.getTime() - tanggalKembali.getTime();
+        long jumlahHari = diffInMillies < 0 ? 0 : Math.abs(diffInMillies);
+        long terlambat = TimeUnit.DAYS.convert(jumlahHari, TimeUnit.MILLISECONDS);
+        return terlambat;
     }
 }
