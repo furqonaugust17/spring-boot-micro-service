@@ -15,7 +15,7 @@ spring:
 
 app:
   rabbitmq-peminjaman:
-    queue: peminjaman.queue
+    queue: peminjaman.queue.email
     exchange: peminjaman.exchange
     routing-key: peminjaman.routing.key
   mail:

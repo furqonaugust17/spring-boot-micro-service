@@ -1,8 +1,5 @@
 package com.furqon.rabbitmq_pustaka;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +8,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.messaging.handler.annotation.Payload;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -18,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import com.furqon.rabbitmq_pustaka.vo.Anggota;
 import com.furqon.rabbitmq_pustaka.vo.Peminjaman;
 import com.furqon.rabbitmq_pustaka.vo.ResponseTemplate;
-import com.rabbitmq.client.RpcClient.Response;
 
 @Service
 public class PeminjamanConsumerService {

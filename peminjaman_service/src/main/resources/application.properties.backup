@@ -1,7 +1,7 @@
 server.port=8086
 spring.application.name=peminjaman-service
 
-spring.datasource.url=jdbc:h2:file:./target/h2db/db/peminjaman;DB_CLOSE_DELAY= 1
+spring.datasource.url=jdbc:postgresql://localhost:5433/pustaka_event
 # spring.datasource.url=jdbc:h2:mem:peminjamandb
 spring.datasource.driverClassName=org.h2.Driver
 spring.datasource.username=sa

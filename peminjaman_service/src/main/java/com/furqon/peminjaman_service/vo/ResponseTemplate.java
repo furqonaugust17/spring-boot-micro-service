@@ -1,16 +1,16 @@
 package com.furqon.peminjaman_service.vo;
 
-import com.furqon.peminjaman_service.model.Peminjaman;
+import com.furqon.peminjaman_service.model.PeminjamanQuery;
 
 public class ResponseTemplate {
-    Peminjaman peminjaman;
+    PeminjamanQuery peminjaman;
     Anggota anggota;
     Buku buku;
 
     public ResponseTemplate() {
     }
 
-    public ResponseTemplate(Anggota anggota, Buku buku, Peminjaman peminjaman) {
+    public ResponseTemplate(Anggota anggota, Buku buku, PeminjamanQuery peminjaman) {
         this.anggota = anggota;
         this.buku = buku;
         this.peminjaman = peminjaman;
@@ -32,11 +32,11 @@ public class ResponseTemplate {
         this.buku = buku;
     }
 
-    public Peminjaman getPeminjaman() {
+    public PeminjamanQuery getPeminjaman() {
         return peminjaman;
     }
 
-    public void setPeminjaman(Peminjaman peminjaman) {
+    public void setPeminjaman(PeminjamanQuery peminjaman) {
         this.peminjaman = peminjaman;
     }
 }
