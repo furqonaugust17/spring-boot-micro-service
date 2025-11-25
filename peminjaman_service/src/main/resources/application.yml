@@ -5,7 +5,7 @@ spring:
     url: jdbc:postgresql://localhost:5433/peminjaman
     driver-class-name: org.postgresql.Driver
     username: postgres
-    password: ''
+    password: '@Furqon_123'
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -26,8 +26,8 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    username: guest
-    password: guest
+    username: admin
+    password: password
     template:
       exchange: peminjaman.exchange
     listener:
@@ -60,3 +60,13 @@ app:
 logging:
   level:
     '[com.furqon.peminjaman_service]': DEBUG
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+server:
+  port: 8086

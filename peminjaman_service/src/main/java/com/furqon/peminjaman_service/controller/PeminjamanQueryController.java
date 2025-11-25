@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/peminjaman/query")
+@RequestMapping("/api/peminjaman")
 @RequiredArgsConstructor
 public class PeminjamanQueryController {
 
@@ -23,6 +23,6 @@ public class PeminjamanQueryController {
     @GetMapping("/{id}")
     public ResponseEntity<PeminjamanQuery> getPeminjamanById(@PathVariable String id) {
         PeminjamanQuery peminjaman = peminajamQueryService.getPeminjamanById(id);
-        return ResponseEntity.ok(peminjaman);
+        return peminjaman != null ? ResponseEntity.ok(peminjaman): ResponseEntity.notFound().build();
     }
 }

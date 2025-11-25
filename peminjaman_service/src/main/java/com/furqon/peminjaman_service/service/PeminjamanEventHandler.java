@@ -1,6 +1,9 @@
 package com.furqon.peminjaman_service.service;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -21,6 +24,9 @@ public class PeminjamanEventHandler {
     private final PeminjamanQueryRepository peminjamanQueryRepository;
     private final RestTemplate restTemplate;
 
+     @Autowired
+    private DiscoveryClient discoveryClient;
+
     @RabbitListener(queues = "${app.rabbitmq.queue.transaction}")
     @Transactional
     public void consume(PeminjamanCommand event) {
@@ -38,10 +44,12 @@ public class PeminjamanEventHandler {
 
         PeminjamanQuery entity = peminjamanQueryRepository.findById(id).orElse(new PeminjamanQuery());
 
-        String anggotaUrl = "http://localhost:9002/api/anggota/" + event.getAnggotaId();
+        ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
+
+        String anggotaUrl = serviceInstance.getUri() + "/api/anggota/" + event.getAnggotaId();
         Anggota anggota = restTemplate.getForObject(anggotaUrl, Anggota.class);
 
-        String bukuUrl = "http://localhost:9002/api/buku/" + event.getAnggotaId();
+        String bukuUrl = serviceInstance.getUri() + "/api/buku/" + event.getAnggotaId();
         Buku buku = restTemplate.getForObject(bukuUrl, Buku.class);
 
 

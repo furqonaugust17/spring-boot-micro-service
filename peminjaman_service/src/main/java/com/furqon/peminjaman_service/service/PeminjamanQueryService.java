@@ -21,6 +21,6 @@ public class PeminjamanQueryService{
     }
 
     public PeminjamanQuery getPeminjamanById(String id){
-        return peminjamanQueryRepository.findById(id).orElseThrow(() -> new RuntimeException("Peminjaman tidak ditemukan"));
+        return peminjamanQueryRepository.findById(id).orElse(null);
     }
 }

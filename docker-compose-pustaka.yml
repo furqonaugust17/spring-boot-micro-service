@@ -1,0 +1,229 @@
+#version: '3.8'
+
+services:
+  # Service Discovery - Eureka Server
+  eureka-pustaka:
+    image: steeltoeoss/eureka-server
+    container_name: eureka-pustaka
+    ports:
+      - "8761:8761"
+    environment:
+      JAVA_OPTS: "-Xmx256m -Xss512k"
+    networks:
+      - pustakaservice-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Database - PostgreSQL
+  postgres-pustaka:
+    image: postgres:latest
+    container_name: postgres-pustaka
+    ports:
+      - "5432"
+    environment:
+      POSTGRES_DB: peminjaman
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - pustakaservice-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d peminjaman || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Database - MongoDB
+  mongo-pustaka:
+    image: mongo:latest
+    container_name: mongo-pustaka
+    ports:
+      - "27017"
+    networks:
+      - pustakaservice-network
+    healthcheck:
+      test: test $$(echo "db.runCommand('ping').ok" | mongosh --port 27017 --quiet) -eq 1
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Message Broker - RabbitMQ
+  rabbitmq-service:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-service
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: password
+    networks:
+      - pustakaservice-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Service Anggota dengan H2 Database
+  anggota-service:
+    build: ./anggota_service
+    container_name: anggota-service
+    ports:
+      - "8084"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-pustaka:8761/eureka/
+      SPRING_RABBITMQ_HOST: rabbitmq-service
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: password
+      
+      # H2 Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/anggota;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: password
+      
+      # H2 Console
+      SPRING_H2_CONSOLE_ENABLED: "true"
+      SPRING_H2_CONSOLE_PATH: /h2-console
+      
+      # JPA Configuration
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      
+      SERVER_PORT: 8084
+    volumes:
+      - anggota_data:/data
+    depends_on:
+      - eureka-pustaka
+      - rabbitmq-service
+    networks:
+      - pustakaservice-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://anggota-service:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Service Buku dengan H2 Database
+  buku-service:
+    build: ./buku_service
+    container_name: buku-service
+    ports:
+      - "8085"
+    environment:
+      # SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-pustaka:8761/eureka/
+      SPRING_RABBITMQ_HOST: rabbitmq-service
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: password
+      
+      # H2 Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/buku;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: password
+      
+      # H2 Console
+      SPRING_H2_CONSOLE_ENABLED: "true"
+      SPRING_H2_CONSOLE_PATH: /h2-console
+      
+      # JPA Configuration
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      
+      SERVER_PORT: 8085
+    volumes:
+      - buku_data:/data
+    depends_on:
+      - eureka-pustaka
+      - rabbitmq-service
+    networks:
+      - pustakaservice-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://buku-service:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  # Service Peminjaman dengan H2 Database
+  peminjaman-service:
+    build: ./peminjaman_service
+    container_name: peminjaman-service
+    ports:
+      - "8086"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-pustaka:8761/eureka/
+      SPRING_RABBITMQ_HOST: rabbitmq-service
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: admin
+      SPRING_RABBITMQ_PASSWORD: password
+      
+      # H2 Database Configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-pustaka:5432/peminjaman
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-pustaka:27017/peminjaman
+      
+      # H2 Console
+      SPRING_H2_CONSOLE_ENABLED: "true"
+      SPRING_H2_CONSOLE_PATH: /h2-console
+      
+      # JPA Configuration
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: create
+      SPRING_JPA_SHOW_SQL: "true"
+      
+      SERVER_PORT: 8086
+    volumes:
+      - peminjaman_data:/data
+    depends_on:
+      - eureka-pustaka
+      - rabbitmq-service
+      - postgres-pustaka
+      - mongo-pustaka
+    networks:
+      - pustakaservice-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Gateway (Opsional)
+  api-gateway-pustaka:
+    build: ./api-gateway-pustaka
+    container_name: api-gateway-pustaka
+    ports:
+      - "9002:9002"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-pustaka:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: api-gateway-pustaka
+      SERVER_PORT: 9002
+    depends_on:
+      - eureka-pustaka
+      - anggota-service
+      - buku-service
+      - peminjaman-service
+    networks:
+      - pustakaservice-network
+
+volumes:
+  anggota_data:
+  buku_data:
+  peminjaman_data:
+
+networks:
+  pustakaservice-network:
+    driver: bridge

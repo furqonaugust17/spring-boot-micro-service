@@ -38,7 +38,11 @@ public class PeminjamanCommandService {
 
     public PeminjamanCommand updatePeminjaman(UUID id, PeminjamanCommand peminjaman) {
         PeminjamanCommand peminjamanCommand = peminjamanCommandRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Peminjaman dengan id " + id + " tidak ditemukan"));
+                .orElse(null);
+
+        if(peminjamanCommand == null){
+            return null;
+        }
 
         peminjamanCommand.setTanggalPinjam(peminjaman.getTanggalPinjam());
         peminjamanCommand.setTanggalKembali(peminjaman.getTanggalKembali());
