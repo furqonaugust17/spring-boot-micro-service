@@ -38,6 +38,22 @@ Sistem ini terbagi menjadi dua domain utama, masing-masing diakses melalui API G
 
 ---
 
+## 🚀 Tahapan Menjalankan Project (UPDATE)
+Karena project pada repository ini sudah menggunakan docker. maka bisa menjalankan beberapa service dengan tahapan dibawah ini.
+1.  **Clone Repository:**
+    ```bash
+    git clone https://github.com/furqonaugust17/spring-boot-micro-service.git
+    cd spring-boot-micro-service
+    ```
+
+2.  **Jalankan File Docker Compose**
+    ```bash
+    docker compose -f docker-compose-pustaka up -d
+    ```
+    Semua service pustaka akan dijalankan secara otomatis.
+
+---
+
 ## 🚀 Tahapan Menjalankan Project
 
 1.  **Clone Repository:**
