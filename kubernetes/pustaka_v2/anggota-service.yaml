@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anggota-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: anggota-service
+  template:
+    metadata:
+      labels:
+        app: anggota-service
+    spec:
+      containers:
+        - name: anggota-service
+          image: furqonaugustseventeenth/praktek-anggota-service:1.0
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-pustaka:8761/eureka/
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq-service
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              value: admin
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: password
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:h2:file:/app/data/anggota
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: org.h2.Driver
+            - name: SPRING_DATASOURCE_USERNAME
+              value: sa
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: password
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: "ANGGOTA-SERVICE"
+            - name: EUREKA_INSTANCE_INSTANCE_ID
+              value: "ANGGOTA-SERVICE:8004"
+            - name: SERVER_PORT
+              value: "8084"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: anggota-service
+spec:
+  selector:
+    app: anggota-service
+  ports:
+    - port: 8084
+      targetPort: 8084

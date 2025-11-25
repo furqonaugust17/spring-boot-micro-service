@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-pustaka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-pustaka
+  template:
+    metadata:
+      labels:
+        app: postgres-pustaka
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: "peminjaman"
+            - name: POSTGRES_USER
+              value: "postgres"
+            - name: POSTGRES_PASSWORD
+              value: "postgres"
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "trust"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-pustaka
+spec:
+  selector:
+    app: postgres-pustaka
+  ports:
+    - port: 5432
+      targetPort: 5432
