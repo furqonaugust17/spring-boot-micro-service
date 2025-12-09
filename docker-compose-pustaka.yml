@@ -87,7 +87,7 @@ services:
     image: docker.elastic.co/logstash/logstash:7.17.0
     container_name: logstash
     volumes:
-      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./config:/usr/share/logstash/pipeline
     ports:
       - "5044:5044"
     depends_on:
@@ -368,7 +368,7 @@ services:
       - pustakaservice-network
 
   jenkins:
-    image: jenkins/jenkins:lts
+    build: ./jenkins
     container_name: jenkins
     user: root
     dns:
