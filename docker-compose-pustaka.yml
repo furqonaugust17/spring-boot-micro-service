@@ -154,7 +154,9 @@ services:
       - pustakaservice-network
 
   filebeat-anggota:
-    build: ./filebeat
+    build: 
+      context: . 
+      dockerfile: filebeat/Dockerfile
     container_name: filebeat-anggota
     user: root
     # ### TAMBAHKAN BARIS INI (Disable permission check) ###
@@ -208,7 +210,9 @@ services:
       - pustakaservice-network
 
   filebeat-buku:
-    build: ./filebeat
+    build: 
+      context: . 
+      dockerfile: filebeat/Dockerfile
     container_name: filebeat-buku
     command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
     volumes:
@@ -263,7 +267,9 @@ services:
       - pustakaservice-network
 
   filebeat-peminjaman:
-    build: ./filebeat
+    build: 
+      context: . 
+      dockerfile: filebeat/Dockerfile
     container_name: filebeat-peminjaman
     command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
     volumes:
@@ -315,7 +321,9 @@ services:
       - pustakaservice-network
 
   filebeat-pengembalian:
-    build: ./filebeat
+    build: 
+      context: . 
+      dockerfile: filebeat/Dockerfile
     container_name: filebeat-pengembalian
     user: root
     # ### TAMBAHKAN BARIS INI (Disable permission check) ###
@@ -352,7 +360,9 @@ services:
       - pustakaservice-network
 
   filebeat-gateway:
-    build: ./filebeat
+    build: 
+      context: . 
+      dockerfile: filebeat/Dockerfile
     container_name: filebeat-gateway
     command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
     volumes:
