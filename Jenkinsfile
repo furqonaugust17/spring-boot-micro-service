@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        COMPOSE_FILE = 'docker-compose-pustaka.yml'
+        COMPOSE_FILE = 'docker-compose.yml'
         SKIP_TESTS = '-DskipTests'
     }
 
@@ -19,72 +19,47 @@ pipeline {
             }
         }
 
+        stage('Start Infrastructure') {
+            steps {
+                echo 'Starting Database, Queue, dan ELK (Tanpa Rebuild)...'
+                sh "docker compose -f ${env.COMPOSE_FILE} up -d --no-build \\
+                    eureka-pustaka \\
+                    postgres-pustaka \\
+                    mongo-pustaka \\
+                    rabbitmq-service \\
+                    elasticsearch \\
+                    logstash \\
+                    kibana"
+
+                echo 'Menunggu 30 detik agar semua service infrastruktur siap...'
+                sleep 30
+            }
+        }
+
         stage('Build All JARs') {
             steps {
                 script {
-                    echo 'Building anggota-service...'
-                    dir('anggota_service') { 
-                        sh "mvn clean package ${env.SKIP_TESTS}" 
-                    }
-                    
-                    echo 'Building buku-service...'
-                    dir('buku-service') {
-                        sh "mvn clean package ${env.SKIP_TESTS}"
-                    }
-                    
-                    echo 'Building peminjaman-service...'
-                    dir('peminjaman_service') {
-                        sh "mvn clean package ${env.SKIP_TESTS}"
-                    }
-                    
-                    echo 'Building pengembalian-service...'
-                    dir('pengembalian_service') {
-                        sh "mvn clean package ${env.SKIP_TESTS}" 
-                    }
-                    
-                    echo 'Building api-gateway-pustaka...'
-                    dir('api-gateway-pustaka') {
-                        sh "mvn clean package ${env.SKIP_TESTS}"
-                    }
+                    echo 'Building Microservices JAR files...'
+                    dir('anggota_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
+                    dir('buku_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
+                    dir('peminjaman_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
+                    dir('pengembalian_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
+                    dir('api-gateway-pustaka') { sh "mvn clean package ${env.SKIP_TESTS}" }
                 }
             }
         }
 
         stage('Build & Deploy Containers') {
-            echo 'Starting parallel deployment using Docker Compose...'
-            
-            parallel {
+            steps {
+                echo 'Starting parallel deployment and re-creation of containers...'
                 
-                stage('Deploy Anggota Service') {
-                    steps {
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service"
-                    }
+                parallel {
+                    stage('Deploy Anggota Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service" } }
+                    stage('Deploy Buku Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service" } }
+                    stage('Deploy Peminjaman Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service" } }
+                    stage('Deploy Pengembalian Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service" } }
+                    stage('Deploy API Gateway') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka" } }
                 }
-                
-                stage('Deploy Buku Service') {
-                    steps {
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service"
-                    }
-                }
-                
-                stage('Deploy Peminjaman Service') {
-                    steps {
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service"
-                    }
-                }
-                
-                stage('Deploy Pengembalian Service') {
-                    steps {
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service"
-                    }
-                }
-                
-                stage('Deploy API Gateway') {
-                    steps {
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka"
-                    }
-                }
-                
             }
         }
     }
@@ -98,7 +73,7 @@ pipeline {
             echo '✅ Deployment berhasil! Semua Microservices telah diperbarui.'
         }
         failure {
-            echo '❌ BUILD GAGAL! Periksa log untuk mengetahui service mana yang error.'
+            echo '❌ BUILD GAGAL!'
         }
     }
 }
