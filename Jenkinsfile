@@ -22,14 +22,16 @@ pipeline {
         stage('Start Infrastructure') {
             steps {
                 echo 'Starting Database, Queue, dan ELK (Tanpa Rebuild)...'
-                sh "docker compose -f ${env.COMPOSE_FILE} up -d --no-build \\
+                sh '''
+                    docker compose -f ${env.COMPOSE_FILE} up -d --no-build \\
                     eureka-pustaka \\
                     postgres-pustaka \\
                     mongo-pustaka \\
                     rabbitmq-service \\
                     elasticsearch \\
                     logstash \\
-                    kibana"
+                    kibana
+                '''
 
                 echo 'Menunggu 30 detik agar semua service infrastruktur siap...'
                 sleep 30
