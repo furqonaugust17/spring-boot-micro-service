@@ -105,10 +105,5 @@ pipeline {
         failure {
             echo '❌ BUILD GAGAL!'
         }
-            cleanup {
-        sh 'docker compose down'
-        sh 'docker image prune -f'
-        cleanWs()
-    }
     }
 }
