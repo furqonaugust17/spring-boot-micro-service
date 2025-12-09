@@ -99,15 +99,16 @@ pipeline {
     }
 
     post {
-        always {
-            cleanWs()
-            sh 'docker image prune -f'
-        }
         success {
             echo '✅ Deployment berhasil! Semua Microservices telah diperbarui.'
         }
         failure {
             echo '❌ BUILD GAGAL!'
         }
+            cleanup {
+        sh 'docker compose down'
+        sh 'docker image prune -f'
+        cleanWs()
+    }
     }
 }
