@@ -52,11 +52,11 @@ pipeline {
             steps {
                 script {
                     echo 'Building Microservices JAR files...'
-                    dir('anggota_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
-                    dir('buku_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
-                    dir('peminjaman_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
-                    dir('pengembalian_service') { sh "mvn clean package ${env.SKIP_TESTS}" }
-                    dir('api-gateway-pustaka') { sh "mvn clean package ${env.SKIP_TESTS}" }
+                    dir('anggota_service') { sh "mvn clean package ${SKIP_TESTS}" }
+                    dir('buku_service') { sh "mvn clean package ${SKIP_TESTS}" }
+                    dir('peminjaman_service') { sh "mvn clean package ${SKIP_TESTS}" }
+                    dir('pengembalian_service') { sh "mvn clean package ${SKIP_TESTS}" }
+                    dir('api-gateway-pustaka') { sh "mvn clean package ${SKIP_TESTS}" }
                 }
             }
         }
@@ -66,36 +66,36 @@ pipeline {
 
                 stage('Deploy Anggota Service') {
                     steps { 
-                        sh 'docker compose -f ${env.COMPOSE_FILE} rm -sf anggota-service filebeat-anggota'
-                        sh 'docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service filebeat-anggota'
+                        sh 'docker compose -f ${COMPOSE_FILE} rm -sf anggota-service filebeat-anggota'
+                        sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps anggota-service filebeat-anggota'
                     }
                 }
 
                 stage('Deploy Buku Service') {
                     steps { 
-                        sh 'docker compose -f ${env.COMPOSE_FILE} rm -sf buku-service filebeat-buku'
-                        sh 'docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service filebeat-buku'
+                        sh 'docker compose -f ${COMPOSE_FILE} rm -sf buku-service filebeat-buku'
+                        sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps buku-service filebeat-buku'
                     }
                 }
 
                 stage('Deploy Peminjaman Service') {
                     steps { 
-                        sh 'docker compose -f ${env.COMPOSE_FILE} rm -sf peminjaman-service filebeat-peminjaman'
-                        sh 'docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service filebeat-peminjaman'
+                        sh 'docker compose -f ${COMPOSE_FILE} rm -sf peminjaman-service filebeat-peminjaman'
+                        sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps peminjaman-service filebeat-peminjaman'
                     }
                 }
 
                 stage('Deploy Pengembalian Service') {
                     steps { 
-                        sh 'docker compose -f ${env.COMPOSE_FILE} rm -sf pengembalian-service filebeat-pengembalian'
-                        sh 'docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service filebeat-pengembalian'
+                        sh 'docker compose -f ${COMPOSE_FILE} rm -sf pengembalian-service filebeat-pengembalian'
+                        sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps pengembalian-service filebeat-pengembalian'
                     }
                 }
 
                 stage('Deploy API Gateway') {
                     steps { 
-                        sh 'docker compose -f ${env.COMPOSE_FILE} rm -sf api-gateway-pustaka filebeat-gateway'
-                        sh 'docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka filebeat-gateway'
+                        sh 'docker compose -f ${COMPOSE_FILE} rm -sf api-gateway-pustaka filebeat-gateway'
+                        sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka filebeat-gateway'
                     }
                 }
 
