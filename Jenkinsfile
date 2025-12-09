@@ -24,7 +24,7 @@ pipeline {
             steps {
                 echo 'Starting Database, Queue, dan ELK...'
                 sh '''
-                    docker compose -f ${env.COMPOSE_FILE} rm -sf \
+                    docker compose -f ${COMPOSE_FILE} rm -sf \
                         eureka-pustaka \
                         postgres-pustaka \
                         mongo-pustaka \
@@ -32,7 +32,9 @@ pipeline {
                         elasticsearch \
                         logstash \
                         kibana
-                    docker compose -f ${env.COMPOSE_FILE} up -d --build \
+                '''
+                sh '''
+                    docker compose -f ${COMPOSE_FILE} up -d --build \
                         eureka-pustaka \
                         postgres-pustaka \
                         mongo-pustaka \
@@ -64,46 +66,31 @@ pipeline {
 
                 stage('Deploy Anggota Service') {
                     steps { 
-                        sh '''
-                        docker compose -f ${env.COMPOSE_FILE} rm -sf anggota-service filebeat-anggota
-                        docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service filebeat-anggota
-                        '''
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service filebeat-anggota"
                     }
                 }
 
                 stage('Deploy Buku Service') {
                     steps { 
-                        sh '''
-                        docker compose -f ${env.COMPOSE_FILE} rm -sf buku-service filebeat-buku
-                        docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service filebeat-buku
-                        '''
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service filebeat-buku"
                     }
                 }
 
                 stage('Deploy Peminjaman Service') {
                     steps { 
-                        sh '''
-                        docker compose -f ${env.COMPOSE_FILE} rm -sf peminjaman-service filebeat-peminjaman
-                        docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service filebeat-peminjaman
-                        '''
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service filebeat-peminjaman"
                     }
                 }
 
                 stage('Deploy Pengembalian Service') {
                     steps { 
-                        sh '''
-                        docker compose -f ${env.COMPOSE_FILE} rm -sf pengembalian-service filebeat-pengembalian
-                        docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service filebeat-pengembalian
-                        '''
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service filebeat-pengembalian"
                     }
                 }
 
                 stage('Deploy API Gateway') {
                     steps { 
-                        sh '''
-                        docker compose -f ${env.COMPOSE_FILE} rm -sf api-gateway-pustaka filebeat-gateway
-                        docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka filebeat-gateway
-                        '''
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka filebeat-gateway"
                     }
                 }
 
