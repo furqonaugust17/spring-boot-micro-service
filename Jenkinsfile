@@ -32,7 +32,7 @@ pipeline {
                         elasticsearch \
                         logstash \
                         kibana
-                    docker compose -f ${COMPOSE_FILE} up -d --build \
+                    docker compose -f ${env.COMPOSE_FILE} up -d --build \
                         eureka-pustaka \
                         postgres-pustaka \
                         mongo-pustaka \
