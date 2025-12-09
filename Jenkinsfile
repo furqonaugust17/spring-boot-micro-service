@@ -20,6 +20,16 @@ pipeline {
             }
         }
 
+        stage('Debug Workspace') {
+            steps {
+                sh 'echo "=== Current Directory ==="'
+                sh 'pwd'
+                
+                sh 'echo "=== Workspace Structure ==="'
+                sh 'ls -R .'
+            }
+        }
+
         stage('Start Infrastructure') {
             steps {
                 echo 'Starting Database, Queue, dan ELK...'
