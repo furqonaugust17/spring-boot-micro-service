@@ -56,31 +56,31 @@ pipeline {
 
                 stage('Deploy Anggota Service') {
                     steps { 
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service"
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service filebeat-anggota"
                     }
                 }
 
                 stage('Deploy Buku Service') {
                     steps { 
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service"
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service filebeat-buku"
                     }
                 }
 
                 stage('Deploy Peminjaman Service') {
                     steps { 
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service"
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service filebeat-peminjaman"
                     }
                 }
 
                 stage('Deploy Pengembalian Service') {
                     steps { 
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service"
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service filebeat-pengembalian"
                     }
                 }
 
                 stage('Deploy API Gateway') {
                     steps { 
-                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka"
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka filebeat-gateway"
                     }
                 }
 
