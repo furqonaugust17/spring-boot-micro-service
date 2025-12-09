@@ -1,7 +1,9 @@
 package com.furqon.pengembalian_service.vo;
 
+import java.util.UUID;
+
 public class Peminjaman {
-    private Long id;
+    private UUID id;
     private String tanggalPinjam;
     private String tanggalKembali;
     private Long anggotaId;
@@ -10,7 +12,7 @@ public class Peminjaman {
     public Peminjaman() {
     }
 
-    public Peminjaman(Long id, String tanggalPinjam, String tanggalKembali, Long anggotaId, Long bukuId) {
+    public Peminjaman(UUID id, String tanggalPinjam, String tanggalKembali, Long anggotaId, Long bukuId) {
         this.id = id;
         this.tanggalPinjam = tanggalPinjam;
         this.tanggalKembali = tanggalKembali;
@@ -18,11 +20,11 @@ public class Peminjaman {
         this.bukuId = bukuId;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 

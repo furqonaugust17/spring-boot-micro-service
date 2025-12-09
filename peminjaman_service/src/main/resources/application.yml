@@ -26,8 +26,8 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    username: admin
-    password: password
+    username: guest
+    password: guest
     template:
       exchange: peminjaman.exchange
     listener:

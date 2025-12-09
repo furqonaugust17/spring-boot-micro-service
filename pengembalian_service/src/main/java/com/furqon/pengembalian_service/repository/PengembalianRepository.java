@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.furqon.pengembalian_service.model.Pengembalian;
 
 @Repository
-public interface PengembalianRepository extends JpaRepository<Pengembalian,Long> {
+public interface PengembalianRepository extends JpaRepository<Pengembalian, Long> {
 
 }

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: pustaka
+data:
+  filebeat.yml: |
+    filebeat.inputs:
+      - type: log
+        enabled: true
+        paths:
+          - /usr/share/filebeat/logs_input/*.log
+
+    output.logstash:
+      hosts: ["logstash:5044"]

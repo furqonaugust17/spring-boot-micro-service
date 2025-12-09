@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: filebeat-pengembalian
+  namespace: pustaka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: filebeat-pengembalian
+  template:
+    metadata:
+      labels:
+        app: filebeat-pengembalian
+    spec:
+      containers:
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:7.17.0
+          command: ["filebeat", "-e", "--strict.perms=false"]
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /usr/share/filebeat/logs_input
+            - name: filebeat-config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+      volumes:
+        - name: logs-volume
+          emptyDir: {}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config

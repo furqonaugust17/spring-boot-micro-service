@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.furqon.pengembalian_service.dto.PengembalianDTO;
 import com.furqon.pengembalian_service.model.Pengembalian;
 import com.furqon.pengembalian_service.repository.PengembalianRepository;
 import com.furqon.pengembalian_service.vo.Anggota;
@@ -41,11 +43,15 @@ public class PengembalianService {
 
     public Pengembalian createPengembalian(Pengembalian pengembalian) throws ParseException {
 
-        long terlambat = this.calculateTerlambat(pengembalian);
-        double denda = terlambat * 1000;
+        Peminjaman peminjaman = this.getPeminjaman(pengembalian.getPeminjamanId());
 
-        pengembalian.setTerlambat(terlambat + " Hari");
-        pengembalian.setDenda(denda);
+        String tanggalKembali = peminjaman.getTanggalKembali();
+        String tanggalDikembalikan = pengembalian.getTanggalDikembalikan();
+        PengembalianDTO result = new PengembalianDTO(tanggalKembali, tanggalDikembalikan);
+
+        String terlambat = "Terlambat " + result.getTerlambat();
+        pengembalian.setTerlambat(terlambat);
+        pengembalian.setDenda(result.getDenda());
 
         return pengembalianRepository.save(pengembalian);
     }
@@ -82,7 +88,7 @@ public class PengembalianService {
         return responseTemplates;
     }
 
-    public Peminjaman getPeminjaman(Long id) {
+    public Peminjaman getPeminjaman(UUID id) {
         try {
             ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
             Peminjaman peminjaman = restTemplate.getForObject(serviceInstance.getUri() + "/api/peminjaman/" + id,
@@ -93,16 +99,18 @@ public class PengembalianService {
         }
     }
 
-    public long calculateTerlambat(Pengembalian pengembalian) throws ParseException {
-        Peminjaman peminjaman = this.getPeminjaman(pengembalian.getPeminjamanId());
-        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+    // public long calculateTerlambat(Pengembalian pengembalian) throws
+    // ParseException {
+    // Peminjaman peminjaman = this.getPeminjaman(pengembalian.getPeminjamanId());
+    // SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
 
-        Date tanggalKembali = sdf.parse(peminjaman.getTanggalKembali());
-        Date tanggalDikembalikan = sdf.parse(pengembalian.getTanggalDikembalikan());
+    // Date tanggalKembali = sdf.parse(peminjaman.getTanggalKembali());
+    // Date tanggalDikembalikan = sdf.parse(pengembalian.getTanggalDikembalikan());
 
-        long diffInMillies = tanggalDikembalikan.getTime() - tanggalKembali.getTime();
-        long jumlahHari = diffInMillies < 0 ? 0 : Math.abs(diffInMillies);
-        long terlambat = TimeUnit.DAYS.convert(jumlahHari, TimeUnit.MILLISECONDS);
-        return terlambat;
-    }
+    // long diffInMillies = tanggalDikembalikan.getTime() -
+    // tanggalKembali.getTime();
+    // long jumlahHari = diffInMillies < 0 ? 0 : Math.abs(diffInMillies);
+    // long terlambat = TimeUnit.DAYS.convert(jumlahHari, TimeUnit.MILLISECONDS);
+    // return terlambat;
+    // }
 }

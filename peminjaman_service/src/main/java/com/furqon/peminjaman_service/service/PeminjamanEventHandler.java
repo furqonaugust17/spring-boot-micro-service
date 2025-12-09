@@ -24,7 +24,7 @@ public class PeminjamanEventHandler {
     private final PeminjamanQueryRepository peminjamanQueryRepository;
     private final RestTemplate restTemplate;
 
-     @Autowired
+    @Autowired
     private DiscoveryClient discoveryClient;
 
     @RabbitListener(queues = "${app.rabbitmq.queue.transaction}")
@@ -52,11 +52,10 @@ public class PeminjamanEventHandler {
         String bukuUrl = serviceInstance.getUri() + "/api/buku/" + event.getAnggotaId();
         Buku buku = restTemplate.getForObject(bukuUrl, Buku.class);
 
-
         entity.setId(id);
         entity.setTanggalPinjam(event.getTanggalPinjam());
         entity.setTanggalKembali(event.getTanggalKembali());
-        
+
         entity.setAnggotaId(event.getAnggotaId());
         if (anggota != null) {
             entity.setNama(anggota.getNama());

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pengembalian-service
+  namespace: pustaka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pengembalian-service
+  template:
+    metadata:
+      labels:
+        app: pengembalian-service
+    spec:
+      containers:
+        - name: pengembalian-service
+          image: pengembalian-service:latest
+          ports:
+            - containerPort: 8087
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-pustaka:8761/eureka/
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq-service
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              value: admin
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: password
+
+            # H2 DB
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:h2:file:/app/data/pengembalian
+            - name: SPRING_DATASOURCE_USERNAME
+              value: sa
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: password
+
+            - name: SERVER_PORT
+              value: "8087"
+
+            - name: LOGGING_FILE_NAME
+              value: /app/logs/pengembalian-service.log
+          volumeMounts:
+            - name: pengembalian-data
+              mountPath: /app/data
+            - name: pengembalian-logs
+              mountPath: /app/logs
+      volumes:
+        - name: pengembalian-data
+          emptyDir: {}
+        - name: pengembalian-logs
+          emptyDir: {}

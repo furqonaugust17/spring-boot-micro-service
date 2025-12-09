@@ -3,6 +3,8 @@
 ## 📌 Deskripsi
 Project ini merupakan implementasi arsitektur **microservices** menggunakan **Spring Boot** sebagai bagian dari tugas kuliah. Sistem ini mengadopsi pola API Gateway sebagai titik masuk tunggal untuk mengakses grup service yang relevan.
 
+Test
+
 Komunikasi dan penemuan service diatur oleh **Eureka Server**, sementara komunikasi asinkron pada layanan perpustakaan ditangani oleh **RabbitMQ**.
 
 ## 🏛️ Arsitektur Sistem
