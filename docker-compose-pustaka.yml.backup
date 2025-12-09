@@ -87,7 +87,7 @@ services:
     image: docker.elastic.co/logstash/logstash:7.17.0
     container_name: logstash
     volumes:
-      - jenkins_home/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     ports:
       - "5044:5044"
     depends_on:
@@ -160,7 +160,7 @@ services:
     # ### TAMBAHKAN BARIS INI (Disable permission check) ###
     command: filebeat -e --strict.perms=false 
     volumes:
-      - jenkins_home/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - logs_anggota:/usr/share/filebeat/logs_input:ro
     depends_on:
       - anggota-service
@@ -213,7 +213,7 @@ services:
     container_name: filebeat-buku
     command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
     volumes:
-      - jenkins_home/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - logs_buku:/usr/share/filebeat/logs_input:ro
     depends_on:
       - buku-service
@@ -269,7 +269,7 @@ services:
     container_name: filebeat-peminjaman
     command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
     volumes:
-      - jenkins_home/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - logs_peminjaman:/usr/share/filebeat/logs_input:ro
     depends_on:
       - peminjaman-service
@@ -324,7 +324,7 @@ services:
     # ### TAMBAHKAN BARIS INI (Disable permission check) ###
     command: filebeat -e --strict.perms=false 
     volumes:
-      - jenkins_home/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - logs_pengembalian:/usr/share/filebeat/logs_input:ro
     depends_on:
       - pengembalian-service
@@ -360,7 +360,7 @@ services:
     container_name: filebeat-gateway
     command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
     volumes:
-      - jenkins_home/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - logs_gateway:/usr/share/filebeat/logs_input:ro
     depends_on:
       - api-gateway-pustaka
