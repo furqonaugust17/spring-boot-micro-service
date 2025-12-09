@@ -84,7 +84,9 @@ services:
       - pustakaservice-network
 
   logstash:
-    build: ./logstash
+    build: 
+      context: . 
+      dockerfile: logstash/Dockerfile
     container_name: logstash
     volumes:
       - ./config/logstash.conf:/usr/share/logstash/pipeline/
