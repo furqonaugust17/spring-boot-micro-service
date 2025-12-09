@@ -23,16 +23,15 @@ pipeline {
             steps {
                 echo 'Starting Database, Queue, dan ELK (Tanpa Rebuild)...'
                 sh '''
-                    docker compose -f ${env.COMPOSE_FILE} up -d --no-build \\
-                    eureka-pustaka \\
-                    postgres-pustaka \\
-                    mongo-pustaka \\
-                    rabbitmq-service \\
-                    elasticsearch \\
-                    logstash \\
-                    kibana
+                    docker compose -f ${COMPOSE_FILE} up -d --no-build \
+                        eureka-pustaka \
+                        postgres-pustaka \
+                        mongo-pustaka \
+                        rabbitmq-service \
+                        elasticsearch \
+                        logstash \
+                        kibana
                 '''
-
                 echo 'Menunggu 30 detik agar semua service infrastruktur siap...'
                 sleep 30
             }
@@ -52,15 +51,26 @@ pipeline {
         }
 
         stage('Build & Deploy Containers') {
-            steps {
-                echo 'Starting parallel deployment and re-creation of containers...'
+            parallel {
                 
-                parallel {
-                    stage('Deploy Anggota Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service" } }
-                    stage('Deploy Buku Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service" } }
-                    stage('Deploy Peminjaman Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service" } }
-                    stage('Deploy Pengembalian Service') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service" } }
-                    stage('Deploy API Gateway') { steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka" } }
+                'Deploy Anggota Service' : {
+                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service" } 
+                },
+                
+                'Deploy Buku Service' : {
+                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service" } 
+                },
+                
+                'Deploy Peminjaman Service' : {
+                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service" } 
+                },
+                
+                'Deploy Pengembalian Service' : {
+                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service" } 
+                },
+                
+                'Deploy API Gateway' : {
+                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka" } 
                 }
             }
         }
