@@ -87,7 +87,7 @@ services:
     image: docker.elastic.co/logstash/logstash:7.17.0
     container_name: logstash
     volumes:
-      - praktek_jenkins_home/config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     ports:
       - "5044:5044"
     depends_on:
@@ -380,6 +380,7 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+      - .:/var/jenkins_home/workspace
     environment:
       JAVA_OPTS: "-Xmx512m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true"
     networks:

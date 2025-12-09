@@ -95,5 +95,10 @@ pipeline {
         failure {
             echo '❌ BUILD GAGAL!'
         }
+        always {
+            echo 'Menjalankan langkah pembersihan...'
+            cleanWs() 
+            sh 'docker image prune -f'
+        }
     }
 }
