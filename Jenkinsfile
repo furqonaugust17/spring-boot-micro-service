@@ -2,16 +2,17 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven-3' 
-        jdk 'jdk-17' 
+        maven 'Maven-3'
+        jdk 'jdk-17'
     }
 
     environment {
-        COMPOSE_FILE = 'docker-compose.yml'
+        COMPOSE_FILE = 'docker-compose-pustaka.yml'
         SKIP_TESTS = '-DskipTests'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 echo 'Checking out source code from Git...'
@@ -21,7 +22,7 @@ pipeline {
 
         stage('Start Infrastructure') {
             steps {
-                echo 'Starting Database, Queue, dan ELK (Tanpa Rebuild)...'
+                echo 'Starting Database, Queue, dan ELK...'
                 sh '''
                     docker compose -f ${COMPOSE_FILE} up -d --no-build \
                         eureka-pustaka \
@@ -32,7 +33,7 @@ pipeline {
                         logstash \
                         kibana
                 '''
-                echo 'Menunggu 30 detik agar semua service infrastruktur siap...'
+                echo 'Menunggu infrastruktur siap (30 detik)...'
                 sleep 30
             }
         }
@@ -52,30 +53,41 @@ pipeline {
 
         stage('Build & Deploy Containers') {
             parallel {
-                
-                'Deploy Anggota Service' : {
-                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service" } 
-                },
-                
-                'Deploy Buku Service' : {
-                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service" } 
-                },
-                
-                'Deploy Peminjaman Service' : {
-                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service" } 
-                },
-                
-                'Deploy Pengembalian Service' : {
-                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service" } 
-                },
-                
-                'Deploy API Gateway' : {
-                    steps { sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka" } 
+
+                stage('Deploy Anggota Service') {
+                    steps { 
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps anggota-service"
+                    }
                 }
+
+                stage('Deploy Buku Service') {
+                    steps { 
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps buku-service"
+                    }
+                }
+
+                stage('Deploy Peminjaman Service') {
+                    steps { 
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps peminjaman-service"
+                    }
+                }
+
+                stage('Deploy Pengembalian Service') {
+                    steps { 
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps pengembalian-service"
+                    }
+                }
+
+                stage('Deploy API Gateway') {
+                    steps { 
+                        sh "docker compose -f ${env.COMPOSE_FILE} up -d --build --no-deps api-gateway-pustaka"
+                    }
+                }
+
             }
         }
     }
-    
+
     post {
         always {
             cleanWs()
