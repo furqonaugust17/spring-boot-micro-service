@@ -371,12 +371,15 @@ services:
     image: jenkins/jenkins:lts
     container_name: jenkins
     user: root
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
-      - "8088:8080"     # UI Jenkins
-      - "50000:50000"   # Jenkins agent port
+      - "8088:8080"
+      - "50000:50000"
     volumes:
-      - jenkins_home:/var/jenkins_home         # Semua job dan build tersimpan
-      - /var/run/docker.sock:/var/run/docker.sock  # Agar Jenkins bisa build Docker image
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       JAVA_OPTS: "-Xmx512m -Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true"
     networks:
