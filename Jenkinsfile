@@ -24,7 +24,7 @@ pipeline {
             steps {
                 echo 'Starting Database, Queue, dan ELK...'
                 sh '''
-                    docker compose -f ${COMPOSE_FILE} up -d --no-build \
+                    docker compose -f ${COMPOSE_FILE} up -d --build \
                         eureka-pustaka \
                         postgres-pustaka \
                         mongo-pustaka \
