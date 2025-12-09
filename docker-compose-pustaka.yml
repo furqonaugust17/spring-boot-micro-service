@@ -141,12 +141,11 @@ services:
       SPRING_JPA_SHOW_SQL: "true"
       
       SERVER_PORT: 8084
-      # Konfigurasi Log agar ditulis ke file
       LOGGING_FILE_NAME: /app/logs/anggota-service.log 
       LOGGING_LEVEL_ROOT: INFO
     volumes:
       - anggota_data:/data
-      - logs_anggota:/app/logs # Volume Logs dishare ke Sidecar
+      - logs_anggota:/app/logs
     depends_on:
       - eureka-pustaka
       - rabbitmq-service
@@ -159,7 +158,6 @@ services:
       dockerfile: filebeat/Dockerfile
     container_name: filebeat-anggota
     user: root
-    # ### TAMBAHKAN BARIS INI (Disable permission check) ###
     command: filebeat -e --strict.perms=false 
     volumes:
       - logs_anggota:/usr/share/filebeat/logs_input:ro
@@ -198,11 +196,10 @@ services:
       SPRING_JPA_SHOW_SQL: "true"
       
       SERVER_PORT: 8085
-      # Konfigurasi Log
       LOGGING_FILE_NAME: /app/logs/buku-service.log
     volumes:
       - buku_data:/data
-      - logs_buku:/app/logs # Volume Logs dishare
+      - logs_buku:/app/logs
     depends_on:
       - eureka-pustaka
       - rabbitmq-service
@@ -214,7 +211,7 @@ services:
       context: . 
       dockerfile: filebeat/Dockerfile
     container_name: filebeat-buku
-    command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
+    command: filebeat -e --strict.perms=false
     volumes:
       - logs_buku:/usr/share/filebeat/logs_input:ro
     depends_on:
@@ -253,11 +250,10 @@ services:
       SPRING_JPA_SHOW_SQL: "true"
       
       SERVER_PORT: 8086
-      # Konfigurasi Log
       LOGGING_FILE_NAME: /app/logs/peminjaman-service.log
     volumes:
       - peminjaman_data:/data
-      - logs_peminjaman:/app/logs # Volume Logs dishare
+      - logs_peminjaman:/app/logs
     depends_on:
       - eureka-pustaka
       - rabbitmq-service
@@ -271,7 +267,7 @@ services:
       context: . 
       dockerfile: filebeat/Dockerfile
     container_name: filebeat-peminjaman
-    command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
+    command: filebeat -e --strict.perms=false
     volumes:
       - logs_peminjaman:/usr/share/filebeat/logs_input:ro
     depends_on:
@@ -308,12 +304,11 @@ services:
       SPRING_JPA_SHOW_SQL: "true"
       
       SERVER_PORT: 8087
-      # Konfigurasi Log agar ditulis ke file
       LOGGING_FILE_NAME: /app/logs/pengembalian-service.log 
       LOGGING_LEVEL_ROOT: INFO
     volumes:
       - pengembalian_data:/data
-      - logs_pengembalian:/app/logs # Volume Logs dishare ke Sidecar
+      - logs_pengembalian:/app/logs
     depends_on:
       - eureka-pustaka
       - rabbitmq-service
@@ -326,7 +321,6 @@ services:
       dockerfile: filebeat/Dockerfile
     container_name: filebeat-pengembalian
     user: root
-    # ### TAMBAHKAN BARIS INI (Disable permission check) ###
     command: filebeat -e --strict.perms=false 
     volumes:
       - logs_pengembalian:/usr/share/filebeat/logs_input:ro
@@ -347,10 +341,9 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-pustaka:8761/eureka/
       EUREKA_INSTANCE_HOSTNAME: api-gateway-pustaka
       SERVER_PORT: 9002
-      # Konfigurasi Log
       LOGGING_FILE_NAME: /app/logs/gateway-service.log
     volumes:
-      - logs_gateway:/app/logs # Volume Logs dishare
+      - logs_gateway:/app/logs
     depends_on:
       - eureka-pustaka
       - anggota-service
@@ -364,7 +357,7 @@ services:
       context: . 
       dockerfile: filebeat/Dockerfile
     container_name: filebeat-gateway
-    command: filebeat -e --strict.perms=false  # <--- Tambahkan di sini
+    command: filebeat -e --strict.perms=false
     volumes:
       - logs_gateway:/usr/share/filebeat/logs_input:ro
     depends_on:
@@ -395,7 +388,6 @@ volumes:
   buku_data:
   peminjaman_data:
   pengembalian_data:
-  # Volume khusus untuk sharing log antara Service & Sidecar
   logs_anggota:
   logs_buku:
   logs_peminjaman:
