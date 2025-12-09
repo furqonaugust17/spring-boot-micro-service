@@ -1,90 +1,64 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven-3' 
+    }
+
     environment {
-        REGISTRY = "furqonaugustseventeenth"
-        IMAGE_NAME = "pustaka-${env.JOB_NAME}"
-        K8S_DIR = "k8s/${env.JOB_NAME}"    // Folder YAML service
-        GITHUB_CREDENTIAL = "github_pat"
-        DOCKER_CREDENTIAL = "dockerhub_cred"
+        COMPOSE_FILE = 'docker-compose-pustaka.yml'
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    credentialsId: "${GITHUB_CREDENTIAL}",
-                    url: 'https://github.com/furqonaugust17/spring-boot-micro-service.git'
+                checkout scm
             }
         }
 
-        stage('Build Maven') {
+        stage('Build JARs') {
             steps {
-                sh """
-                    echo "Running Maven Build..."
-                    mvn -DskipTests clean package
-                """
+                sh 'mvn clean package -DskipTests' 
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh """
-                        echo "Building Docker Image..."
-                        docker build -t ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER} .
-                    """
+        stage('Build & Deploy Containers') {
+            parallel {
+                stage('Anggota Service') {
+                    steps {
+                        script {
+                            sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps anggota-service'
+                        }
+                    }
                 }
-            }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIAL}",
-                                    usernameVariable: "USER",
-                                    passwordVariable: "PASS")]) {
-
-                        sh """
-                            echo "Logging in to Docker Hub..."
-                            echo "${PASS}" | docker login -u "${USER}" --password-stdin
-                            docker push ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}
-                        """
+                stage('Buku Service') {
+                    steps {
+                        script {
+                            sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps buku-service'
+                        }
+                    }
+                }
+                stage('Peminjaman Service') {
+                    steps {
+                        script {
+                            sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps peminjaman-service'
+                        }
+                    }
+                }
+                stage('Pengembalian Service') {
+                    steps {
+                        script {
+                            sh 'docker compose -f ${COMPOSE_FILE} up -d --build --no-deps pengembalian-service'
+                        }
                     }
                 }
             }
         }
-
-        stage('Update Kubernetes Manifest') {
-            steps {
-                script {
-                    sh """
-                        echo "Updating Kubernetes YAML with new image tag..."
-                        sed -i 's|image: ${REGISTRY}/${IMAGE_NAME}:.*|image: ${REGISTRY}/${IMAGE_NAME}:${BUILD_NUMBER}|g' ${K8S_DIR}/deployment.yaml
-                    """
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    sh """
-                        echo "Applying Kubernetes Deployment..."
-                        kubectl apply -f ${K8S_DIR}/
-                    """
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo "Deploy Success!"
-        }
-        failure {
-            echo "Deploy Failed!"
+        
+        stage('Cleanup') {
+             steps {
+                 sh 'docker image prune -f'
+             }
         }
     }
 }
