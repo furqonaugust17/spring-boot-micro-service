@@ -35,8 +35,12 @@ spec:
               value: docker
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: http://eureka-pustaka:8761/eureka/
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
             - name: EUREKA_INSTANCE_HOSTNAME
-              value: api-gateway-pustaka
+              value: "API-GATEWAY-PUSTAKA"
+            - name: EUREKA_INSTANCE_INSTANCE_ID
+              value: "API-GATEWAY-PUSTAKA:9002"
             - name: SERVER_PORT
               value: "9002"
             - name: LOGGING_FILE_NAME

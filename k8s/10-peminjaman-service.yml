@@ -52,6 +52,14 @@ spec:
               value: postgres
             - name: SPRING_DATA_MONGODB_URI
               value: mongodb://mongo-pustaka:27017/peminjaman
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: "PEMINJAMAN-SERVICE"
+            - name: EUREKA_INSTANCE_INSTANCE_ID
+              value: "PEMINJAMAN-SERVICE:8006"
+            - name: SPRING_APPLICATION_NAME
+              value: "peminjaman-service"
             - name: SERVER_PORT
               value: "8086"
             - name: LOGGING_FILE_NAME

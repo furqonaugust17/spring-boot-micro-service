@@ -48,6 +48,12 @@ spec:
               value: sa
             - name: SPRING_DATASOURCE_PASSWORD
               value: password
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: "BUKU-SERVICE"
+            - name: EUREKA_INSTANCE_INSTANCE_ID
+              value: "BUKU-SERVICE:8005"
             - name: SERVER_PORT
               value: "8085"
             - name: LOGGING_FILE_NAME

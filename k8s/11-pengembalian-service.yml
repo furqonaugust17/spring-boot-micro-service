@@ -50,6 +50,14 @@ spec:
               value: sa
             - name: SPRING_DATASOURCE_PASSWORD
               value: password
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: "PENGEMBALIAN-SERVICE"
+            - name: EUREKA_INSTANCE_INSTANCE_ID
+              value: "PENGEMBALIAN-SERVICE:8006"
+            - name: SPRING_APPLICATION_NAME
+              value: "pengembalian-service"
             - name: SERVER_PORT
               value: "8087"
             - name: LOGGING_FILE_NAME
