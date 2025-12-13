@@ -31,8 +31,12 @@ spec:
           env:
             - name: JAVA_OPTS
               value: "-Xmx256m -Xss512k"
-          livenessProbe:
-            exec:
-              command: ["curl", "-f", "http://localhost:8761"]
+          livenessProbe: 
+            httpGet: 
+              path: /actuator/health
+              port: 8761
+              scheme: HTTP
             initialDelaySeconds: 30
-            periodSeconds: 30
+            periodSeconds: 15 
+            timeoutSeconds: 5 
+            failureThreshold: 3
