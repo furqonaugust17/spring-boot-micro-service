@@ -107,21 +107,21 @@ pipeline {
                 script {
                     echo 'Deploying to Kubernetes Cluster...'
 
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/00-storage.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/01-eureka.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/02-postgres.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/03-mongo.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/04-rabbitmq.yaml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/00-storage.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/01-eureka.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/02-postgres.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/03-mongo.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/04-rabbitmq.yml"
                     
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/05-elasticsearch.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/06-logstash.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/07-kibana.yaml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/05-elasticsearch.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/06-logstash.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/07-kibana.yml"
 
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/08-anggota-service.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/09-buku-service.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/10-peminjaman-service.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/11-pengembalian-service.yaml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/12-api-gateway.yaml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/08-anggota-service.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/09-buku-service.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/10-peminjaman-service.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/11-pengembalian-service.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/12-api-gateway.yml"
                     
                     echo 'Rolling out restarts to pick up new images...'
                     sh "kubectl rollout restart deployment/anggota-service"
