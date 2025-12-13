@@ -107,7 +107,7 @@ pipeline {
                 script {
                     echo 'Deploying to Kubernetes Cluster...'
 
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/00-storage.yml --validate=false"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/00-storage.yml"
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/01-eureka.yml"
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/02-postgres.yml"
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/03-mongo.yml"
