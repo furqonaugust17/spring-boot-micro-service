@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pengembalian-service
+spec:
+  selector:
+    app: pengembalian-service
+  ports:
+    - port: 8087
+      targetPort: 8087
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pengembalian-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pengembalian-service
+  template:
+    metadata:
+      labels:
+        app: pengembalian-service
+    spec:
+      containers:
+        - name: pengembalian-service
+          # GANTI IMAGE
+          image: furqonaugustseventeenth/pengembalian-service:latest 
+          ports:
+            - containerPort: 8087
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-pustaka:8761/eureka/
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq-service
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              value: admin
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: password
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:h2:file:/app/data/pengembalian;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: org.h2.Driver
+            - name: SPRING_DATASOURCE_USERNAME
+              value: sa
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: password
+            - name: SERVER_PORT
+              value: "8087"
+            - name: LOGGING_FILE_NAME
+              value: /app/logs/pengembalian-service.log
+            - name: LOGGING_LEVEL_ROOT
+              value: INFO
+          volumeMounts:
+            - name: pengembalian-data
+              mountPath: /data
+            - name: logs-volume
+              mountPath: /app/logs
+        # Sidecar
+        - name: filebeat-pengembalian
+          # GANTI IMAGE
+          image: furqonaugustseventeenth/filebeat:latest 
+          command: ["filebeat", "-e", "--strict.perms=false"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /usr/share/filebeat/logs_input
+              readOnly: true
+      volumes:
+        - name: pengembalian-data
+          persistentVolumeClaim:
+            claimName: pengembalian-data-pvc
+        - name: logs-volume
+          emptyDir: {}

@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: anggota-service
+spec:
+  selector:
+    app: anggota-service
+  ports:
+    - port: 8084
+      targetPort: 8084
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anggota-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: anggota-service
+  template:
+    metadata:
+      labels:
+        app: anggota-service
+    spec:
+      containers:
+        - name: anggota-service
+          # GANTI IMAGE
+          image: furqonaugustseventeenth/anggota-service:latest 
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-pustaka:8761/eureka/
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq-service
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              value: admin
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: password
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:h2:file:/app/data/anggota;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: org.h2.Driver
+            - name: SPRING_DATASOURCE_USERNAME
+              value: sa
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: password
+            - name: SERVER_PORT
+              value: "8084"
+            - name: LOGGING_FILE_NAME
+              value: /app/logs/anggota-service.log
+            - name: LOGGING_LEVEL_ROOT
+              value: INFO
+          volumeMounts:
+            - name: anggota-data
+              mountPath: /data
+            - name: logs-volume
+              mountPath: /app/logs
+        # Sidecar
+        - name: filebeat-anggota
+          # GANTI IMAGE
+          image: furqonaugustseventeenth/filebeat:latest 
+          command: ["filebeat", "-e", "--strict.perms=false"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /usr/share/filebeat/logs_input
+              readOnly: true
+      volumes:
+        - name: anggota-data
+          persistentVolumeClaim:
+            claimName: anggota-data-pvc
+        - name: logs-volume
+          emptyDir: {}

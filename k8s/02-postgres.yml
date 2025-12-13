@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-pustaka
+spec:
+  selector:
+    app: postgres-pustaka
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-pustaka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-pustaka
+  template:
+    metadata:
+      labels:
+        app: postgres-pustaka
+    spec:
+      containers:
+        - name: postgres-pustaka
+          image: postgres:latest
+          env:
+            - name: POSTGRES_DB
+              value: peminjaman
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+          ports:
+            - containerPort: 5432
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres", "-d", "peminjaman"]
+            initialDelaySeconds: 30
+            periodSeconds: 30

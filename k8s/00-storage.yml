@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: anggota-data-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: buku-data-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: peminjaman-data-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pengembalian-data-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 1Gi } }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-home-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources: { requests: { storage: 5Gi } }
