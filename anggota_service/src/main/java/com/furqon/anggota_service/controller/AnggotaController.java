@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.furqon.anggota_service.model.Anggota;
 import com.furqon.anggota_service.service.AnggotaService;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/anggota")
@@ -35,6 +36,12 @@ public class AnggotaController {
     @PostMapping
     public Anggota createAnggota(@RequestBody Anggota anggota) {
         return anggotaService.createAnggota(anggota);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Anggota> updateAnggota(@PathVariable Long id, @RequestBody Anggota anggota) {
+        Anggota anggotaUpdate = anggotaService.updateAnggota(id, anggota);
+        return anggotaUpdate != null ? ResponseEntity.ok(anggotaUpdate) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")

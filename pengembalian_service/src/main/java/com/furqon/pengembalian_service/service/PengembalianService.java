@@ -88,6 +88,25 @@ public class PengembalianService {
         return responseTemplates;
     }
 
+    public Pengembalian updatePengembalian(Long id, Pengembalian pengembalian) throws ParseException {
+        Pengembalian oldData = pengembalianRepository.findById(id).orElse(null);
+        if (oldData == null) {
+            return null;
+        }
+
+        Peminjaman peminjaman = this.getPeminjaman(oldData.getPeminjamanId());
+
+        String tanggalKembali = peminjaman.getTanggalKembali();
+        String tanggalDikembalikan = pengembalian.getTanggalDikembalikan();
+        PengembalianDTO result = new PengembalianDTO(tanggalKembali, tanggalDikembalikan);
+
+        String terlambat = "Terlambat " + result.getTerlambat();
+        oldData.setTerlambat(terlambat);
+        oldData.setDenda(result.getDenda());
+
+        return pengembalianRepository.save(oldData);
+    }
+
     public Peminjaman getPeminjaman(UUID id) {
         try {
             ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);

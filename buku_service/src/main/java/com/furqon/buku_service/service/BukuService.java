@@ -13,16 +13,32 @@ public class BukuService {
     @Autowired
     private BukuRepository bukuRepository;
 
-    public List<Buku> getAllBuku(){
+    public List<Buku> getAllBuku() {
         return bukuRepository.findAll();
     }
 
-     public Buku getBukuById(Long id) {
+    public Buku getBukuById(Long id) {
         return bukuRepository.findById(id).orElse(null);
     }
 
     public Buku createBuku(Buku buku) {
         return bukuRepository.save(buku);
+    }
+
+    public Buku updateBuku(Long id, Buku buku) {
+        Buku oldData = bukuRepository.findById(id).orElse(null);
+        if (oldData == null) {
+            return null;
+        }
+
+        oldData.setJudul(buku.getJudul());
+        oldData.setPenerbit(buku.getPenerbit());
+        oldData.setPengarang(buku.getPengarang());
+        oldData.setTahunTerbit(buku.getTahunTerbit());
+
+        Buku updated = bukuRepository.save(oldData);
+
+        return updated;
     }
 
     public void deleteBuku(Long id) {

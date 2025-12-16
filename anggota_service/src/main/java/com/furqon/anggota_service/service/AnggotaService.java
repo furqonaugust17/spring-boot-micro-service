@@ -13,16 +13,32 @@ public class AnggotaService {
     @Autowired
     private AnggotaRepository anggotaRepository;
 
-    public List<Anggota> getAllAnggota(){
+    public List<Anggota> getAllAnggota() {
         return anggotaRepository.findAll();
     }
 
-     public Anggota getAnggotaById(Long id) {
+    public Anggota getAnggotaById(Long id) {
         return anggotaRepository.findById(id).orElse(null);
     }
 
     public Anggota createAnggota(Anggota anggota) {
         return anggotaRepository.save(anggota);
+    }
+
+    public Anggota updateAnggota(Long id, Anggota anggota) {
+        Anggota oldData = anggotaRepository.findById(id).orElse(null);
+        if (oldData == null) {
+            return null;
+        }
+
+        oldData.setNama(anggota.getNama());
+        oldData.setNim(anggota.getNim());
+        oldData.setJenisKelamin(anggota.getJenisKelamin());
+        oldData.setEmail(anggota.getEmail());
+
+        Anggota updated = anggotaRepository.save(oldData);
+
+        return updated;
     }
 
     public void deleteAnggota(Long id) {
