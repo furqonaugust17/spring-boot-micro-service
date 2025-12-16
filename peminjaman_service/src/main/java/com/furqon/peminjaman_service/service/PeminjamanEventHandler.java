@@ -49,7 +49,7 @@ public class PeminjamanEventHandler {
         String anggotaUrl = serviceInstance.getUri() + "/api/anggota/" + event.getAnggotaId();
         Anggota anggota = restTemplate.getForObject(anggotaUrl, Anggota.class);
 
-        String bukuUrl = serviceInstance.getUri() + "/api/buku/" + event.getAnggotaId();
+        String bukuUrl = serviceInstance.getUri() + "/api/buku/" + event.getBukuId();
         Buku buku = restTemplate.getForObject(bukuUrl, Buku.class);
 
         entity.setId(id);

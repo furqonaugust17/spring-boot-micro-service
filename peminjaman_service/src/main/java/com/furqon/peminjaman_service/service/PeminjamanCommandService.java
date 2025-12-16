@@ -5,16 +5,21 @@ import java.util.UUID;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.furqon.peminjaman_service.model.PeminjamanCommand;
 import com.furqon.peminjaman_service.repository.jpa.PeminjamanCommandRepository;
+import com.furqon.peminjaman_service.vo.Anggota;
+import com.furqon.peminjaman_service.vo.Buku;
 
 @Service
 public class PeminjamanCommandService {
     @Autowired
     private PeminjamanCommandRepository peminjamanCommandRepository;
-    
+
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -27,7 +32,23 @@ public class PeminjamanCommandService {
     @Value("${app.rabbitmq.routing-key.transaction}")
     private String routingKey;
 
+    @Autowired
+    private DiscoveryClient discoveryClient;
+
     public PeminjamanCommand createPeminjaman(PeminjamanCommand peminjaman) {
+        ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
+
+        RestTemplate restTemplate = new RestTemplate();
+        String anggotaUrl = serviceInstance.getUri() + "/api/anggota/" + peminjaman.getAnggotaId();
+        Anggota anggota = restTemplate.getForObject(anggotaUrl, Anggota.class);
+
+        String bukuUrl = serviceInstance.getUri() + "/api/buku/" + peminjaman.getBukuId();
+        Buku buku = restTemplate.getForObject(bukuUrl, Buku.class);
+
+        if (anggota == null || buku == null) {
+            return null;
+        }
+
         PeminjamanCommand saved = peminjamanCommandRepository.save(peminjaman);
 
         saved.setEventType(PeminjamanCommand.EventType.CREATED);
@@ -40,7 +61,7 @@ public class PeminjamanCommandService {
         PeminjamanCommand peminjamanCommand = peminjamanCommandRepository.findById(id)
                 .orElse(null);
 
-        if(peminjamanCommand == null){
+        if (peminjamanCommand == null) {
             return null;
         }
 
@@ -66,7 +87,7 @@ public class PeminjamanCommandService {
         PeminjamanCommand peminjamanEvent = new PeminjamanCommand();
         peminjamanEvent.setId(id);
         peminjamanEvent.setEventType(PeminjamanCommand.EventType.DELETED);
-        
+
         rabbitTemplate.convertAndSend(exchange, routingKey, peminjamanEvent);
     }
 }

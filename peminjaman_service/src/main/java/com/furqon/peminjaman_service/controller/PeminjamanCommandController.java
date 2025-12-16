@@ -22,9 +22,10 @@ public class PeminjamanCommandController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PeminjamanCommand> updatePeminjaman(@PathVariable UUID id, @RequestBody PeminjamanCommand peminjaman) {
+    public ResponseEntity<PeminjamanCommand> updatePeminjaman(@PathVariable UUID id,
+            @RequestBody PeminjamanCommand peminjaman) {
         PeminjamanCommand peminjamanUpdate = peminjamanCommandService.updatePeminjaman(id, peminjaman);
-        return peminjamanUpdate != null ? ResponseEntity.ok(peminjamanUpdate): ResponseEntity.notFound().build();
+        return peminjamanUpdate != null ? ResponseEntity.ok(peminjamanUpdate) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
