@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.furqon.peminjaman_service.model.PeminjamanCommand;
 import com.furqon.peminjaman_service.repository.jpa.PeminjamanCommandRepository;
@@ -36,25 +39,41 @@ public class PeminjamanCommandService {
     private DiscoveryClient discoveryClient;
 
     public PeminjamanCommand createPeminjaman(PeminjamanCommand peminjaman) {
-        ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
 
-        RestTemplate restTemplate = new RestTemplate();
-        String anggotaUrl = serviceInstance.getUri() + "/api/anggota/" + peminjaman.getAnggotaId();
-        Anggota anggota = restTemplate.getForObject(anggotaUrl, Anggota.class);
+        ServiceInstance serviceInstance = discoveryClient
+                .getInstances("API-GATEWAY-PUSTAKA")
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("API Gateway tidak tersedia"));
 
-        String bukuUrl = serviceInstance.getUri() + "/api/buku/" + peminjaman.getBukuId();
-        Buku buku = restTemplate.getForObject(bukuUrl, Buku.class);
+        String baseUrl = serviceInstance.getUri().toString();
 
-        if (anggota == null || buku == null) {
-            return null;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            Anggota anggota = restTemplate.getForObject(
+                    baseUrl + "/api/anggota/" + peminjaman.getAnggotaId(),
+                    Anggota.class);
+
+            Buku buku = restTemplate.getForObject(
+                    baseUrl + "/api/buku/" + peminjaman.getBukuId(),
+                    Buku.class);
+
+            PeminjamanCommand saved = peminjamanCommandRepository.save(peminjaman);
+            saved.setEventType(PeminjamanCommand.EventType.CREATED);
+
+            rabbitTemplate.convertAndSend(exchange, routingKey, saved);
+            return saved;
+
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Anggota atau Buku tidak ditemukan");
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Gagal membuat peminjaman");
         }
-
-        PeminjamanCommand saved = peminjamanCommandRepository.save(peminjaman);
-
-        saved.setEventType(PeminjamanCommand.EventType.CREATED);
-        rabbitTemplate.convertAndSend(exchange, routingKey, saved);
-
-        return saved;
     }
 
     public PeminjamanCommand updatePeminjaman(UUID id, PeminjamanCommand peminjaman) {
