@@ -19,8 +19,10 @@ import com.furqon.rabbitmq_pustaka.dto.PeminjamanEventPayload;
 import com.furqon.rabbitmq_pustaka.event.EventType;
 import com.furqon.rabbitmq_pustaka.notification.PeminjamanEmailTemplate;
 import com.furqon.rabbitmq_pustaka.vo.PeminjamanDetailResponse;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class PeminjamanConsumerService {
 
     @Autowired
@@ -45,12 +47,11 @@ public class PeminjamanConsumerService {
         }
 
         if (payload.getEventType() == EventType.DELETED) {
-            System.out.println("Delete event diterima, email tidak dikirim. ID: " + payload.getId());
+            log.info("Delete event diterima, email tidak dikirim. ID: " + payload.getId());
             return;
         }
 
-        System.out.println("Receive email event: " + payload.getEventType()
-                + " | ID: " + payload.getId());
+        log.info("Receive email event: " + payload.getEventType() + " | ID: " + payload.getId());
 
         try {
             ServiceInstance serviceInstance = discoveryClient
@@ -95,11 +96,10 @@ public class PeminjamanConsumerService {
 
             javaMailSender.send(mailMessage);
 
-            System.out.println("Email berhasil dikirim ke: " + data.getEmail());
-
+            log.info("Email berhasil dikirim ke: ", data.getEmail());
         } catch (Exception e) {
-            System.out.println("Gagal mengirim email peminjaman");
-            e.printStackTrace();
+            log.warn("Gagal mengirim email peminjaman");
+            log.error(e.toString());
         }
     }
 
