@@ -30,19 +30,21 @@ spec:
             - containerPort: 8090
 
           env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: docker
             - name: SPRING_APPLICATION_NAME
-              value: rabbitmq-pustaka
+              value: rabbitmq-email-service
             - name: SERVER_PORT
               value: "8090"
 
             - name: SPRING_RABBITMQ_HOST
-              value: rabbitmq-email-service
+              value: rabbitmq-service
             - name: SPRING_RABBITMQ_PORT
               value: "5672"
             - name: SPRING_RABBITMQ_USERNAME
-              value: guest
+              value: admin
             - name: SPRING_RABBITMQ_PASSWORD
-              value: guest
+              value: password
             - name: SPRING_RABBITMQ_TEMPLATE_EXCHANGE
               value: peminjaman.exchange
             - name: SPRING_RABBITMQ_LISTENER_SIMPLE_DEFAULT_REQUEUE_REJECTED
@@ -86,13 +88,17 @@ spec:
               value: "true"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: http://eureka-pustaka:8761/eureka/
+            - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
+              value: "true"
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: "RABBITMQ-EMAIL-SERVICE"
+            - name: EUREKA_INSTANCE_INSTANCE_ID
+              value: "RABBITMQ-EMAIL-SERVICE:8090"
 
             - name: LOGGING_LEVEL_COM_FURQON_RABBITMQ_PUSTAKA
               value: DEBUG
 
-        # Sidecar
         - name: filebeat-rabbitmq-email
-          # GANTI IMAGE
           image: furqonaugustseventeenth/filebeat:latest 
           command: ["filebeat", "-e", "--strict.perms=false"]
           securityContext:
