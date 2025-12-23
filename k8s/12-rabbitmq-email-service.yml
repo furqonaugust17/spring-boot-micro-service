@@ -4,7 +4,7 @@ metadata:
   name: rabbitmq-email-service
 spec:
   selector:
-    app: rabbitmq-pustaka
+    app: rabbitmq-email-service
   ports:
     - port: 8090
       targetPort: 8090
@@ -17,14 +17,14 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: rabbitmq-pustaka
+      app: rabbitmq-email-service
   template:
     metadata:
       labels:
-        app: rabbitmq-pustaka
+        app: rabbitmq-email-service
     spec:
       containers:
-        - name: rabbitmq-pustaka
+        - name: rabbitmq-email-service
           image: furqonaugustseventeenth/rabbitmq-email-service:latest
           ports:
             - containerPort: 8090
@@ -37,6 +37,7 @@ spec:
             - name: SERVER_PORT
               value: "8090"
 
+            # RabbitMQ Broker
             - name: SPRING_RABBITMQ_HOST
               value: rabbitmq-service
             - name: SPRING_RABBITMQ_PORT
@@ -45,18 +46,19 @@ spec:
               value: admin
             - name: SPRING_RABBITMQ_PASSWORD
               value: password
+
             - name: SPRING_RABBITMQ_TEMPLATE_EXCHANGE
               value: peminjaman.exchange
             - name: SPRING_RABBITMQ_LISTENER_SIMPLE_DEFAULT_REQUEUE_REJECTED
               value: "false"
 
+            # App config
             - name: APP_RABBITMQ_PEMINJAMAN_QUEUE
               value: peminjaman.queue.email
-            - name: APP_RABBITMQ_PEMINJAMAN_EXCHANGE
-              value: peminjaman.exchange
             - name: APP_RABBITMQ_PEMINJAMAN_ROUTING_KEY
               value: peminjaman.routing.key.email
 
+            # Mail
             - name: SPRING_MAIL_HOST
               value: smtp.gmail.com
             - name: SPRING_MAIL_PORT
@@ -82,24 +84,25 @@ spec:
             - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
               value: "true"
 
-            - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
-              value: "true"
-            - name: EUREKA_CLIENT_FETCH_REGISTRY
-              value: "true"
+            # Eureka
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
               value: http://eureka-pustaka:8761/eureka/
             - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
               value: "true"
-            - name: EUREKA_INSTANCE_HOSTNAME
-              value: "RABBITMQ-EMAIL-SERVICE"
-            - name: EUREKA_INSTANCE_INSTANCE_ID
-              value: "RABBITMQ-EMAIL-SERVICE:8090"
 
-            - name: LOGGING_LEVEL_COM_FURQON_RABBITMQ_PUSTAKA
-              value: DEBUG
+            # Logging (PENTING UNTUK FILEBEAT)
+            - name: LOGGING_FILE_NAME
+              value: /app/logs/rabbitmq-email-service.log
+            - name: LOGGING_LEVEL_ROOT
+              value: INFO
 
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /app/logs
+
+        # Sidecar Filebeat
         - name: filebeat-rabbitmq-email
-          image: furqonaugustseventeenth/filebeat:latest 
+          image: furqonaugustseventeenth/filebeat:latest
           command: ["filebeat", "-e", "--strict.perms=false"]
           securityContext:
             runAsUser: 0
@@ -109,8 +112,5 @@ spec:
               readOnly: true
 
       volumes:
-        - name: rabbitmq-data
-          persistentVolumeClaim:
-            claimName: rabbitmq-data-pvc
         - name: logs-volume
           emptyDir: {}
