@@ -7,16 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.furqon.peminjaman_service.event.PeminjamanCreatedEvent;
 import com.furqon.peminjaman_service.model.PeminjamanCommand;
 import com.furqon.peminjaman_service.repository.jpa.PeminjamanCommandRepository;
-import com.furqon.peminjaman_service.vo.Anggota;
-import com.furqon.peminjaman_service.vo.Buku;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class PeminjamanCommandService {
@@ -24,20 +26,12 @@ public class PeminjamanCommandService {
     private PeminjamanCommandRepository peminjamanCommandRepository;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Value("${app.rabbitmq.queue.transaction}")
-    private String queueTransaction;
-
-    @Value("${app.rabbitmq.exchange}")
-    private String exchange;
-
-    @Value("${app.rabbitmq.routing-key.transaction}")
-    private String routingKey;
-
-    @Autowired
     private DiscoveryClient discoveryClient;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Transactional
     public PeminjamanCommand createPeminjaman(PeminjamanCommand peminjaman) {
 
         ServiceInstance serviceInstance = discoveryClient
@@ -50,18 +44,20 @@ public class PeminjamanCommandService {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            Anggota anggota = restTemplate.getForObject(
-                    baseUrl + "/api/anggota/" + peminjaman.getAnggotaId(),
-                    Anggota.class);
 
-            Buku buku = restTemplate.getForObject(
+            restTemplate.getForObject(
+                    baseUrl + "/api/anggota/" + peminjaman.getAnggotaId(),
+                    Void.class);
+
+            restTemplate.getForObject(
                     baseUrl + "/api/buku/" + peminjaman.getBukuId(),
-                    Buku.class);
+                    Void.class);
 
             PeminjamanCommand saved = peminjamanCommandRepository.save(peminjaman);
             saved.setEventType(PeminjamanCommand.EventType.CREATED);
 
-            rabbitTemplate.convertAndSend(exchange, routingKey, saved);
+            eventPublisher.publishEvent(new PeminjamanCreatedEvent(saved));
+
             return saved;
 
         } catch (HttpClientErrorException.NotFound e) {
@@ -76,6 +72,7 @@ public class PeminjamanCommandService {
         }
     }
 
+    @Transactional
     public PeminjamanCommand updatePeminjaman(UUID id, PeminjamanCommand peminjaman) {
         PeminjamanCommand peminjamanCommand = peminjamanCommandRepository.findById(id)
                 .orElse(null);
@@ -92,10 +89,11 @@ public class PeminjamanCommandService {
         PeminjamanCommand updated = peminjamanCommandRepository.save(peminjamanCommand);
 
         updated.setEventType(PeminjamanCommand.EventType.UPDATED);
-        rabbitTemplate.convertAndSend(exchange, routingKey, updated);
+        eventPublisher.publishEvent(new PeminjamanCreatedEvent(updated));
         return peminjamanCommand;
     }
 
+    @Transactional
     public void deletePeminjaman(UUID id) {
         if (!peminjamanCommandRepository.existsById(id)) {
             throw new RuntimeException("Peminjaman dengan id " + id + " tidak ditemukan");
@@ -107,6 +105,6 @@ public class PeminjamanCommandService {
         peminjamanEvent.setId(id);
         peminjamanEvent.setEventType(PeminjamanCommand.EventType.DELETED);
 
-        rabbitTemplate.convertAndSend(exchange, routingKey, peminjamanEvent);
+        eventPublisher.publishEvent(new PeminjamanCreatedEvent(peminjamanEvent));
     }
 }

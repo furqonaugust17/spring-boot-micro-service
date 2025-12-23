@@ -17,13 +17,13 @@ app:
   rabbitmq-peminjaman:
     queue: peminjaman.queue.email
     exchange: peminjaman.exchange
-    routing-key: peminjaman.routing.key
+    routing-key: peminjaman.routing.key.email
   mail:
     host: "smtp.gmail.com"
     port: 587
-    username: "your email"
-    from: "your email"
-    password: "your password"
+    username: ${SMTP_USERNAME}
+    from: ${SMTP_FROM}
+    password: ${SMTP_PASSWORD}
     properties:
       mail:
         smtp:
@@ -34,3 +34,13 @@ app:
 logging:
   level:
     '[com.furqon.rabbitmq-pustaka]': DEBUG
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+server:
+  port: 8090

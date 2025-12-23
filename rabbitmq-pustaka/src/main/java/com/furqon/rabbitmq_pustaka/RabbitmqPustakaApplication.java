@@ -13,28 +13,29 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class RabbitmqPustakaApplication {
 	@Value("${app.mail.host}")
-    private String host;
-	
+	private String host;
+
 	@Value("${app.mail.port}")
-    private Integer port;
+	private Integer port;
 
 	@Value("${app.mail.username}")
-    private String username;
-	
+	private String username;
+
 	@Value("${app.mail.password}")
-    private String password;
+	private String password;
 
 	public static void main(String[] args) {
 		SpringApplication.run(RabbitmqPustakaApplication.class, args);
 	}
 
 	@Bean
-	public RestTemplate restTemplate(){
+	public RestTemplate restTemplate() {
 		return new RestTemplate();
 	}
 
 	@Bean
 	public JavaMailSender getJavaMailSender() {
+		System.out.println("ada message masuk");
 		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 		mailSender.setHost(host);
 		mailSender.setPort(port);

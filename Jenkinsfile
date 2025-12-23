@@ -35,6 +35,7 @@ pipeline {
                     dir('buku_service') { sh "mvn clean package ${SKIP_TESTS}" }
                     dir('peminjaman_service') { sh "mvn clean package ${SKIP_TESTS}" }
                     dir('pengembalian_service') { sh "mvn clean package ${SKIP_TESTS}" }
+                    dir('rabbitmq-pustaka') { sh "mvn clean package ${SKIP_TESTS}" }
                     dir('api-gateway-pustaka') { sh "mvn clean package ${SKIP_TESTS}" }
                 }
             }
@@ -89,6 +90,13 @@ pipeline {
                                     img.push("latest")
                                 }
                             },
+                            'Build Rabbitmq Email': {
+                                dir('rabbitmq-pustaka') {
+                                    def img = docker.build("${DOCKER_REGISTRY_USER}/rabbitmq-email-service:${IMAGE_TAG}")
+                                    img.push()
+                                    img.push("latest")
+                                }
+                            },
                             'Build Gateway': {
                                 dir('api-gateway-pustaka') {
                                     def img = docker.build("${DOCKER_REGISTRY_USER}/api-gateway-pustaka:${IMAGE_TAG}")
@@ -98,6 +106,24 @@ pipeline {
                             }
                         )
                     }
+                }
+            }
+        }
+
+        stage('Apply Kubernetes Secrets') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'smtp-username', variable: 'SMTP_USERNAME'),
+                    string(credentialsId: 'smtp-password', variable: 'SMTP_PASSWORD'),
+                    string(credentialsId: 'smtp-from', variable: 'SMTP_FROM')
+                ]) {
+                    sh '''
+                    kubectl create secret generic smtp-secret \
+                    --from-literal=SMTP_USERNAME="$SMTP_USERNAME" \
+                    --from-literal=SMTP_PASSWORD="$SMTP_PASSWORD" \
+                    --from-literal=SMTP_FROM="$SMTP_FROM" \
+                    --dry-run=client -o yaml | kubectl apply -f -
+                    '''
                 }
             }
         }
@@ -121,13 +147,15 @@ pipeline {
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/09-buku-service.yml"
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/10-peminjaman-service.yml"
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/11-pengembalian-service.yml"
-                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/12-api-gateway.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/12-rabbitmq-email-service.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/13-api-gateway.yml"
                     
                     echo 'Rolling out restarts to pick up new images...'
                     sh "kubectl rollout restart deployment/anggota-service"
                     sh "kubectl rollout restart deployment/buku-service"
                     sh "kubectl rollout restart deployment/peminjaman-service"
                     sh "kubectl rollout restart deployment/pengembalian-service"
+                    sh "kubectl rollout restart deployment/rabbitmq-email-service"
                     sh "kubectl rollout restart deployment/api-gateway-pustaka"
                     sh "kubectl rollout restart deployment/logstash"
                 }

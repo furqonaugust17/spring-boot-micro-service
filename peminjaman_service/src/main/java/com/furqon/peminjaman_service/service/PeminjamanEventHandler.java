@@ -30,33 +30,44 @@ public class PeminjamanEventHandler {
     @RabbitListener(queues = "${app.rabbitmq.queue.transaction}")
     @Transactional
     public void consume(PeminjamanCommand event) {
-        String id = event.getId().toString();
+
         if (event == null || event.getId() == null) {
-            log.warn("Menerima event null atau tanpa ID, pesan diabaikan.");
+            log.warn("Event null, diabaikan");
             return;
         }
+
+        String id = event.getId().toString();
 
         if (PeminjamanCommand.EventType.DELETED.equals(event.getEventType())) {
             peminjamanQueryRepository.deleteById(id);
-            log.info("🗑️ Delete ke MongoDB berhasil untuk ID: {}", event.getId());
+            log.info("🗑️ Delete Mongo ID {}", id);
             return;
         }
 
-        PeminjamanQuery entity = peminjamanQueryRepository.findById(id).orElse(new PeminjamanQuery());
+        PeminjamanQuery entity = peminjamanQueryRepository
+                .findById(id)
+                .orElse(new PeminjamanQuery());
 
-        ServiceInstance serviceInstance = discoveryClient.getInstances("API-GATEWAY-PUSTAKA").get(0);
+        ServiceInstance serviceInstance = discoveryClient
+                .getInstances("API-GATEWAY-PUSTAKA")
+                .stream()
+                .findFirst()
+                .orElseThrow();
 
-        String anggotaUrl = serviceInstance.getUri() + "/api/anggota/" + event.getAnggotaId();
-        Anggota anggota = restTemplate.getForObject(anggotaUrl, Anggota.class);
+        String baseUrl = serviceInstance.getUri().toString();
 
-        String bukuUrl = serviceInstance.getUri() + "/api/buku/" + event.getBukuId();
-        Buku buku = restTemplate.getForObject(bukuUrl, Buku.class);
+        Anggota anggota = restTemplate.getForObject(
+                baseUrl + "/api/anggota/" + event.getAnggotaId(),
+                Anggota.class);
+
+        Buku buku = restTemplate.getForObject(
+                baseUrl + "/api/buku/" + event.getBukuId(),
+                Buku.class);
 
         entity.setId(id);
         entity.setTanggalPinjam(event.getTanggalPinjam());
         entity.setTanggalKembali(event.getTanggalKembali());
 
-        entity.setAnggotaId(event.getAnggotaId());
         if (anggota != null) {
             entity.setNama(anggota.getNama());
             entity.setEmail(anggota.getEmail());
@@ -64,7 +75,6 @@ public class PeminjamanEventHandler {
             entity.setJenisKelamin(anggota.getJenisKelamin());
         }
 
-        entity.setBukuId(event.getBukuId());
         if (buku != null) {
             entity.setJudulBuku(buku.getJudul());
             entity.setPengarangBuku(buku.getPengarang());
@@ -73,10 +83,7 @@ public class PeminjamanEventHandler {
         }
 
         peminjamanQueryRepository.save(entity);
-        if (PeminjamanCommand.EventType.CREATED.equals(event.getEventType())) {
-            log.info("📩 Insert ke MongoDB berhasil untuk ID: {}", entity.getId());
-        } else {
-            log.info("✅ Update ke MongoDB berhasil untuk ID: {}", entity.getId());
-        }
+
+        log.info("✅ MongoDB sync berhasil untuk ID {}", id);
     }
 }

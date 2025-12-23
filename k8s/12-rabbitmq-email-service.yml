@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-pustaka
+spec:
+  selector:
+    app: rabbitmq-pustaka
+  ports:
+    - port: 8090
+      targetPort: 8090
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-pustaka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq-pustaka
+  template:
+    metadata:
+      labels:
+        app: rabbitmq-pustaka
+    spec:
+      containers:
+        - name: rabbitmq-pustaka
+          image: furqonaugustseventeenth/rabbitmq-email-service:latest
+          ports:
+            - containerPort: 8090
+
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: rabbitmq-pustaka
+            - name: SERVER_PORT
+              value: "8090"
+
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq-email-service
+            - name: SPRING_RABBITMQ_PORT
+              value: "5672"
+            - name: SPRING_RABBITMQ_USERNAME
+              value: guest
+            - name: SPRING_RABBITMQ_PASSWORD
+              value: guest
+            - name: SPRING_RABBITMQ_TEMPLATE_EXCHANGE
+              value: peminjaman.exchange
+            - name: SPRING_RABBITMQ_LISTENER_SIMPLE_DEFAULT_REQUEUE_REJECTED
+              value: "false"
+
+            - name: APP_RABBITMQ_PEMINJAMAN_QUEUE
+              value: peminjaman.queue.email
+            - name: APP_RABBITMQ_PEMINJAMAN_EXCHANGE
+              value: peminjaman.exchange
+            - name: APP_RABBITMQ_PEMINJAMAN_ROUTING_KEY
+              value: peminjaman.routing.key.email
+
+            - name: SPRING_MAIL_HOST
+              value: smtp.gmail.com
+            - name: SPRING_MAIL_PORT
+              value: "587"
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-secret
+                  key: SMTP_USERNAME
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-secret
+                  key: SMTP_PASSWORD
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: smtp-secret
+                  key: SMTP_FROM
+
+            - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
+              value: "true"
+            - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
+              value: "true"
+
+            - name: EUREKA_CLIENT_REGISTER_WITH_EUREKA
+              value: "true"
+            - name: EUREKA_CLIENT_FETCH_REGISTRY
+              value: "true"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: http://eureka-pustaka:8761/eureka/
+
+            - name: LOGGING_LEVEL_COM_FURQON_RABBITMQ_PUSTAKA
+              value: DEBUG
