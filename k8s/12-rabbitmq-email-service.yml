@@ -101,3 +101,10 @@ spec:
             - name: logs-volume
               mountPath: /usr/share/filebeat/logs_input
               readOnly: true
+
+      volumes:
+        - name: rabbitmq-data
+          persistentVolumeClaim:
+            claimName: rabbitmq-data-pvc
+        - name: logs-volume
+          emptyDir: {}
