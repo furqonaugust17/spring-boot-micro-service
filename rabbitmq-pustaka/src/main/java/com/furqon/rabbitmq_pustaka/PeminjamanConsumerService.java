@@ -96,7 +96,7 @@ public class PeminjamanConsumerService {
 
             javaMailSender.send(mailMessage);
 
-            log.info("Email berhasil dikirim ke: ", data.getEmail());
+            log.info("Email berhasil dikirim ke: " + data.getEmail());
         } catch (Exception e) {
             log.warn("Gagal mengirim email peminjaman");
             log.error(e.toString());
