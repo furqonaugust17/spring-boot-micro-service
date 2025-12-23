@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rabbitmq-pustaka
+  name: rabbitmq-email-service
 spec:
   selector:
     app: rabbitmq-pustaka
@@ -12,7 +12,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rabbitmq-pustaka
+  name: rabbitmq-email-service
 spec:
   replicas: 1
   selector:
