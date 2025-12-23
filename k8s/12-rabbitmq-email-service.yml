@@ -89,3 +89,15 @@ spec:
 
             - name: LOGGING_LEVEL_COM_FURQON_RABBITMQ_PUSTAKA
               value: DEBUG
+
+        # Sidecar
+        - name: filebeat-rabbitmq-email
+          # GANTI IMAGE
+          image: furqonaugustseventeenth/filebeat:latest 
+          command: ["filebeat", "-e", "--strict.perms=false"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: logs-volume
+              mountPath: /usr/share/filebeat/logs_input
+              readOnly: true
