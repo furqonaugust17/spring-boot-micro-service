@@ -89,6 +89,10 @@ spec:
               value: http://eureka-pustaka:8761/eureka/
             - name: EUREKA_INSTANCE_PREFER_IP_ADDRESS
               value: "true"
+            - name: EUREKA_INSTANCE_HOSTNAME
+              value: "RABBITMQ-email-SERVICE"
+            - name: EUREKA_INSTANCE_INSTANCE_ID
+              value: "RABBITMQ-email-SERVICE:8090"
 
             # Logging (PENTING UNTUK FILEBEAT)
             - name: LOGGING_FILE_NAME
