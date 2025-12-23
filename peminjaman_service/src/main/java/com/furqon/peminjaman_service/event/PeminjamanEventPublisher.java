@@ -22,16 +22,10 @@ public class PeminjamanEventPublisher {
     @Value("${app.rabbitmq.routing-key.transaction}")
     private String routingTransaction;
 
-    @Value("${app.rabbitmq.routing-key.email}")
-    private String routingEmail;
-
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleAfterCommit(PeminjamanCreatedEvent event) {
 
         PeminjamanCommand data = event.getPeminjaman();
         rabbitTemplate.convertAndSend(exchange, routingTransaction, data);
-        rabbitTemplate.convertAndSend(exchange, routingEmail, new PeminjamanEmailEvent(
-                data.getId(),
-                data.getEventType()));
     }
 }

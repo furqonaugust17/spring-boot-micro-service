@@ -1,13 +1,16 @@
 package com.furqon.peminjaman_service.service;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.furqon.peminjaman_service.dto.PeminjamanEmailEvent;
 import com.furqon.peminjaman_service.model.PeminjamanCommand;
 import com.furqon.peminjaman_service.model.PeminjamanQuery;
 import com.furqon.peminjaman_service.repository.mongo.PeminjamanQueryRepository;
@@ -26,6 +29,15 @@ public class PeminjamanEventHandler {
 
     @Autowired
     private DiscoveryClient discoveryClient;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Value("${app.rabbitmq.exchange}")
+    private String exchange;
+
+    @Value("${app.rabbitmq.routing-key.email}")
+    private String routingEmail;
 
     @RabbitListener(queues = "${app.rabbitmq.queue.transaction}")
     @Transactional
@@ -67,6 +79,8 @@ public class PeminjamanEventHandler {
         entity.setId(id);
         entity.setTanggalPinjam(event.getTanggalPinjam());
         entity.setTanggalKembali(event.getTanggalKembali());
+        entity.setAnggotaId(event.getAnggotaId());
+        entity.setBukuId(event.getBukuId());
 
         if (anggota != null) {
             entity.setNama(anggota.getNama());
@@ -83,6 +97,11 @@ public class PeminjamanEventHandler {
         }
 
         peminjamanQueryRepository.save(entity);
+        rabbitTemplate.convertAndSend(
+                exchange,
+                routingEmail, new PeminjamanEmailEvent(
+                        event.getId(),
+                        event.getEventType()));
 
         log.info("✅ MongoDB sync berhasil untuk ID {}", id);
     }
