@@ -59,29 +59,29 @@ spec:
               value: peminjaman.routing.key.email
 
             # Mail
-            - name: SPRING_MAIL_HOST
+            - name: APP_MAIL_HOST
               value: smtp.gmail.com
-            - name: SPRING_MAIL_PORT
+            - name: APP_MAIL_PORT
               value: "587"
-            - name: SPRING_MAIL_USERNAME
+            - name: APP_MAIL_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: smtp-secret
                   key: SMTP_USERNAME
-            - name: SPRING_MAIL_PASSWORD
+            - name: APP_MAIL_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: smtp-secret
                   key: SMTP_PASSWORD
-            - name: SMTP_FROM
+            - name: APP_MAIL_FROM
               valueFrom:
                 secretKeyRef:
                   name: smtp-secret
                   key: SMTP_FROM
 
-            - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH
+            - name: APP_MAIL_PROPERTIES_MAIL_SMTP_AUTH
               value: "true"
-            - name: SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
+            - name: APP_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE
               value: "true"
 
             # Eureka
