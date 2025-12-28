@@ -179,6 +179,3 @@ Semua request harus melalui API Gateway.
 | GET | `/api/pengembalian/{id}` | Mendapatkan pengembalian berdasarkan ID |
 | GET | `/api/pengembalian/{id}/detail` | Mendapatkan pengembalian berdasarkan ID beserta detailnya |
 | DELETE | `/api/pengembalian/{id}` | Menghapus pengembalian berdasarkan ID |
-
-
-testing migration jenkins
