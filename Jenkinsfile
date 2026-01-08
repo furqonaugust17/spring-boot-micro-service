@@ -149,6 +149,7 @@ pipeline {
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/11-pengembalian-service.yml"
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/12-rabbitmq-email-service.yml"
                     sh "kubectl apply -f ${K8S_MANIFEST_DIR}/13-api-gateway.yml"
+                    sh "kubectl apply -f ${K8S_MANIFEST_DIR}/15-service-monitor.yml"
                     
                     echo 'Rolling out restarts to pick up new images...'
                     sh "kubectl rollout restart deployment/anggota-service"
@@ -159,6 +160,18 @@ pipeline {
                     sh "kubectl rollout restart deployment/api-gateway-pustaka"
                     sh "kubectl rollout restart deployment/logstash"
                 }
+            }
+        }
+
+        stage('Verify Monitoring') {
+            steps {
+                echo 'Checking Prometheus targets...'
+                sh '''
+                sleep 30
+                kubectl port-forward svc/monitoring-kube-prometheus-prometheus 9090:9090 &
+                sleep 5
+                curl -s http://localhost:9090/api/v1/targets | grep anggota-service || exit 1
+                '''
             }
         }
     }
