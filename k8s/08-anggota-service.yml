@@ -2,11 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: anggota-service
+  labels:
+    app: anggota-service
+    monitoring: enabled 
 spec:
   selector:
     app: anggota-service
   ports:
-    - port: 8084
+    - name: http
+      port: 8084
       targetPort: 8084
 ---
 apiVersion: apps/v1
@@ -62,6 +66,10 @@ spec:
               value: /app/logs/anggota-service.log
             - name: LOGGING_LEVEL_ROOT
               value: INFO
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus"
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "anggota-service"
           volumeMounts:
             - name: anggota-data
               mountPath: /data

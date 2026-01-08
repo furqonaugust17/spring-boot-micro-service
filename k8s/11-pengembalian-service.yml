@@ -2,11 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: pengembalian-service
+  labels:
+    app: pengembalian-service
+    monitoring: enabled
 spec:
   selector:
     app: pengembalian-service
   ports:
-    - port: 8087
+    - name: http
+      port: 8087
       targetPort: 8087
 ---
 apiVersion: apps/v1
@@ -64,6 +68,10 @@ spec:
               value: /app/logs/pengembalian-service.log
             - name: LOGGING_LEVEL_ROOT
               value: INFO
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus"
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "pengembalian-service"
           volumeMounts:
             - name: pengembalian-data
               mountPath: /data

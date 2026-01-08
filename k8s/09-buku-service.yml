@@ -2,11 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: buku-service
+  labels:
+    app: buku-service
+    monitoring: enabled
 spec:
   selector:
     app: buku-service
   ports:
-    - port: 8085
+    - name: http
+      port: 8085
       targetPort: 8085
 ---
 apiVersion: apps/v1
@@ -58,6 +62,10 @@ spec:
               value: "8085"
             - name: LOGGING_FILE_NAME
               value: /app/logs/buku-service.log
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus"
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "buku-service"
           volumeMounts:
             - name: buku-data
               mountPath: /data

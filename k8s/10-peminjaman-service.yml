@@ -2,11 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: peminjaman-service
+  labels:
+    app: peminjaman-service
+    monitoring: enabled
 spec:
   selector:
     app: peminjaman-service
   ports:
-    - port: 8086
+    - name: http
+      port: 8086
       targetPort: 8086
 ---
 apiVersion: apps/v1
@@ -64,6 +68,10 @@ spec:
               value: "8086"
             - name: LOGGING_FILE_NAME
               value: /app/logs/peminjaman-service.log
+            - name: MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE
+              value: "health,info,prometheus"
+            - name: MANAGEMENT_METRICS_TAGS_APPLICATION
+              value: "peminjaman-service"
           volumeMounts:
             - name: peminjaman-data
               mountPath: /data
