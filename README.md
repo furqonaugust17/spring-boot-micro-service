@@ -52,5 +52,4 @@ Di dalamnya terdapat panduan:
 ## 👨‍💻 Author
 
 **Furqon August Seventeenth**  
-Mahasiswa Teknologi Rekayasa Perangkat Lunak  
-Backend & Mobile Enthusiast
+Mahasiswa Teknologi Rekayasa Perangkat Lunak Politeknik Negeri Padang
