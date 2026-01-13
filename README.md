@@ -3,7 +3,7 @@
 Project ini merupakan implementasi arsitektur **Microservices** menggunakan **Spring Boot 3 (Java 17)** dengan pendekatan **Hybrid Deployment**:
 
 - 🚀 Infrastruktur dan Microservices Domain Pustaka dijalankan di **Kubernetes**  
-- 🔄 CI/CD Pipeline dijalankan menggunakan **Jenkins (Docker Compose)**  
+- 🔄 CI/CD Pipeline dijalankan menggunakan **Jenkins**  
 - 📊 Observability menggunakan **ELK Stack (Elasticsearch, Logstash, Kibana)**  
 - 📨 Komunikasi Asinkron menggunakan **RabbitMQ**  
 - 🗄️ Database menggunakan **PostgreSQL**, **MongoDB**, dan **H2**
